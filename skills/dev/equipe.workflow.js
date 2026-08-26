@@ -1,7 +1,7 @@
 export const meta = {
   name: 'equipe',
-  description: 'Pipeline executável completo da equipe: 6 modos de operação (projeto-do-zero, feature-nova, bugfix, redesign, auditoria, resgate-de-projeto + classificação automática), gates com devolução (máx. 2), fan-out/fan-in com plano de execução por ownership, gate de craft com loop de correção, auditoria de segurança com re-verificação, loop de qualidade tester→QA com roteamento de bug por dimensão e diagnóstico estrutural em não-convergência. Usa /ui-ux-pro-max, /impeccable e as satélites do Playbook 9 (Supabase, Stitch, knowledge-work, awesome-copilot) como ferramentas operadas pelo especialista. Autônomo: PARA nos 4 gates humanos (escopo/custo/produção/dados) — deploy só executa se pré-autorizado via args.autorizadoDeploy.',
-  whenToUse: 'Rodar o núcleo não-interativo do /equipe em qualquer projeto. Faça o kickoff você mesmo e passe as respostas em args (ou modo:"auto" para o workflow classificar). Deploy e ações pagas ficam para você autorizar — ou pré-autorize o deploy com autorizadoDeploy:true.',
+  description: 'Pipeline executável completo da equipe: 6 modos de operação (projeto-do-zero, feature-nova, bugfix, redesign, auditoria, resgate-de-projeto) + modo consolidar (só EQUIPE.md) + classificação automática. 12 especialistas. Gates com devolução (máx. 2), fan-out/fan-in, gate de craft, segurança, gate de performance, loop tester→QA. /consolidar é secretário do canvas (invocação solta). Autônomo: PARA nos 4 gates humanos. Deploy só com args.autorizadoDeploy.',
+  whenToUse: 'Rodar o núcleo não-interativo do /equipe em qualquer projeto. Faça o kickoff você mesmo e passe as respostas em args (ou modo:"auto"). modo:"consolidar" só atualiza o EQUIPE.md a partir de um handoff — não despacha o time. Deploy e ações pagas ficam para você autorizar.',
   phases: [
     { title: 'Kickoff + EQUIPE.md' },
     { title: 'Classificar modo' },
@@ -10,6 +10,7 @@ export const meta = {
     { title: 'Implementação' },
     { title: 'Gate de craft' },
     { title: 'Segurança' },
+    { title: 'Performance' },
     { title: 'Qualidade (tester + QA)' },
     { title: 'Pré-deploy' },
     { title: 'Auditoria / Resgate' },
@@ -27,9 +28,12 @@ export const meta = {
 //     publico:      "para quem",
 //     plataforma:   "web" | "mobile" | "ambos",
 //     modo:         "auto" | "projeto-do-zero" | "feature-nova" | "bugfix" | "redesign"
-//                   | "auditoria" | "resgate-de-projeto",
+//                   | "auditoria" | "resgate-de-projeto" | "consolidar",
 //     temLLM:       true|false,   temPagamento: true|false,
 //     tocaSensivel: true|false,   // auth / dados sensíveis / upload (aciona segurança na feature)
+//     tocaPerformance: true|false, // default: true no zero/auditoria/resgate e na feature com UI/LLM;
+//                                 // no bugfix só se o brief/bug falar de lentidão
+//     handoff:      "docs/handoffs/....md", // só no modo consolidar (arquivo ou pasta)
 //     temMarca:     true|false,   // já existe design system? (se não, designers semeiam com /ui-ux-pro-max)
 //     root:         ".",          // raiz do repo onde o EQUIPE.md e o código vivem
 //     bug:          "descrição do bug (modo bugfix)",
@@ -167,6 +171,7 @@ function satelitesDo(skill) {
     '/engenheiro-senior-produto': 'UI: premium-frontend-ui, anti-ui-slop, web-design-reviewer. Stitch→código: stitch-react-components (web) / stitch-react-native (mobile). Motion: gsap-framer-scroll-animation. Copy: ux-copy. Se a feature toca banco: supabase + supabase-postgres-best-practices. Mais /impeccable craft/animate/polish.',
     '/engenheiro-ia': 'Prompt/eval: finalize-agent-prompt, prompt-optimizer, eval-driven-dev, agentic-eval. Segurança de prompt/agente: ai-prompt-engineering-safety-review, agent-governance, agent-owasp-compliance. RAG/pgvector: supabase-postgres-best-practices + supabase.',
     '/engenheiro-seguranca': 'Auditoria: security-review, audit-integrity. RLS/Auth: supabase + supabase-postgres-best-practices. Secrets/supply chain: secret-scanning, dependabot, codeql, github-actions-hardening. LGPD: gdpr-compliant, data-breach-blast-radius. Threat model: threat-model-analyst, tm7-threat-model. MCP/agente: mcp-security-audit, mcp-implementation-security-review, agent-owasp-compliance.',
+    '/engenheiro-performance': 'Query/índice: postgresql-optimization, sql-optimization, sql-queries, write-query. Se toca índice/RLS/EXPLAIN: supabase-postgres-best-practices DEPOIS supabase. Medição web: playwright-explore-website, chrome-devtools, playwright-generate-test. CI/budget: github-actions-efficiency, github-actions-hardening. Review SQL: postgresql-code-review, sql-code-review. Relatório em docs/perf/. Sem baseline medido (p50/p95/p99) não otimiza.',
     '/tester': 'OBRIGATÓRIO: execute o checklist mestre desta skill. Bloco 0 antes de testar; Anexo A smoke 30 min; cada item OK/NOK/N/A com evidência; N/A sem justificativa = reprovado. Playwright/E2E: playwright-generate-test, playwright-explore-website, webapp-testing, chrome-devtools. Unitário: javascript-typescript-jest, react19-test-patterns. Bug: bug-reproduction-brief, bug-receipt. Estratégia: testing-strategy, quality-playbook. A11y/visual: accessibility-review, ui-screenshots.',
     '/qa-senior': 'OBRIGATÓRIO: execute o checklist mestre desta skill. Seção 0 (entry) antes de aceitar o build; Seção 27 (exit) item a item no veredito; Bloqueador/Crítico = REPROVADA. Estratégia: testing-strategy, quality-playbook. Bug report: bug-reproduction-brief, bug-receipt. Dados: validate-data. Você julga; o /tester opera Playwright.',
     '/engenheiro-devops': 'Migrations/CI: supabase + supabase-postgres-best-practices ANTES de db push. Pré-deploy: deploy-checklist. Actions: github-actions-efficiency, github-actions-hardening, create-github-action-workflow-specification. Release: github-release, devops-rollout-plan. Incidente: incident-response, incident-postmortem. Secrets: secret-scanning, dependabot.',
@@ -291,6 +296,7 @@ function donoDoBug(b) {
       return { skill: designer, ferramentas: '/impeccable bolder|quieter|typeset|layout|animate|clarify conforme o defeito' }
     }
     case 'llm': return { skill: '/engenheiro-ia', ferramentas: '' }
+    case 'performance': return { skill: '/engenheiro-performance', ferramentas: '' }
     case 'seguranca': return { skill: '/dev-senior', ferramentas: '' } // re-verificado pelo /engenheiro-seguranca em seguida
     default: return { skill: '/engenheiro-senior-produto', ferramentas: '/impeccable craft|animate|polish quando houver UI' }
   }
@@ -315,6 +321,35 @@ Olhe o terreno se precisar (existe código? EQUIPE.md? testes?) e classifique em
 // Segurança sempre no projeto-do-zero; na feature só se toca superfície sensível.
 const rodarSeguranca = modo === 'projeto-do-zero' || tocaSensivel || temPagamento || temLLM
 
+const parecePerf = /lento|lentid|performance|otimiz|latênc|latenc|p95|p99|gargalo|n\+1|web vitals|\binp\b|\blcp\b/i.test(`${brief} ${cfg.bug || ''}`)
+const tocaPerformance = cfg.tocaPerformance !== undefined
+  ? !!cfg.tocaPerformance
+  : (modo === 'projeto-do-zero' || modo === 'auditoria' || modo === 'resgate-de-projeto'
+    || ((modo === 'feature-nova' || modo === 'redesign') && (temUI || temLLM))
+    || (modo === 'bugfix' && parecePerf))
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MODO CONSOLIDAR — só o secretário do EQUIPE.md (não despacha o time)
+// ═════════════════════════════════════════════════════════════════════════════
+if (modo === 'consolidar') {
+  phase('Kickoff + EQUIPE.md')
+  const handoffRef = cfg.handoff || `${ROOT}/docs/handoffs`
+  const cons = await agent(
+    `Atue como a skill /consolidar. Carregue e siga skills/dev/consolidar.md integralmente.
+${CONTRATO}
+Handoff de entrada: ${handoffRef} (arquivo, pasta docs/handoffs/, ou o bloco 🤝 HANDOFF na mensagem).
+Canvas: ${EQUIPE}.
+NÃO despache nenhum especialista. NÃO classifique modo de pipeline. NÃO valide gate de produto. NÃO escreva código.
+Se EQUIPE.md não existe, crie o esqueleto (modo solo). Upsert artefatos, decisões (append) e pendências. Uma linha no histórico. Repo vence canvas mentiroso. Pare e reporte o que gravou.`,
+    { label: 'consolidar:canvas', phase: 'Kickoff + EQUIPE.md', schema: HANDOFF }
+  ).catch(() => null)
+  return {
+    modo: 'consolidar', consolidacao: cons,
+    precisaAutorizacaoHumana: GATES_HUMANOS, kickoff: ecoKickoff(),
+    nota: 'Só o canvas foi atualizado. Para seguir o pipeline, acione /equipe num dos 6 modos.',
+  }
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // MODO 3 — BUGFIX (caminho curto: dev → tester re-roda TUDO → QA)
 // ═════════════════════════════════════════════════════════════════════════════
@@ -332,13 +367,27 @@ if (modo === 'bugfix') {
         'código provado rodando + teste de regressão + relatório de entrega (Playbook 3)'),
       { label: 'dev:bugfix', phase: 'Implementação', schema: HANDOFF }))
 
-  const q = await rodarLoopQualidade('a suíte INTEIRA (não só o teste do bug — regressão nasce no conserto)', [fixR.handoff])
+  let perfFix = null
+  if (tocaPerformance) {
+    phase('Performance')
+    perfFix = await despacharComGate('Performance', 'bugfix-perf→tester',
+      'baseline do bug de lentidão medido (p50/p95/p99); causa raiz perfilada; correção de perf pura OU patch para /dev-senior; antes×depois; gate no CI se o ganho precisar de proteção',
+      faltas => agent(
+        comoSkill('/engenheiro-performance',
+          `MODO 2 — o bug é de performance. Perfile, corrija a causa estrutural (não a tela), re-meça nas mesmas condições.${blocoDevolucao(faltas)}`,
+          'o fix do /dev-senior + o bug relatado', '',
+          'delta medido + causa na origem (Playbook 3)'),
+        { label: 'perf:bugfix', phase: 'Performance', schema: HANDOFF }))
+  }
+
+  const q = await rodarLoopQualidade('a suíte INTEIRA (não só o teste do bug — regressão nasce no conserto)', [fixR.handoff, perfFix && perfFix.handoff].filter(Boolean))
   phase('Pré-deploy')
   const plano = await planoDeDeploy()
   const deployExec = await talvezExecutarDeploy(q, plano)
-  await scribeFinal([fixR.handoff, ...q.registro, plano, deployExec].filter(Boolean))
+  await scribeFinal([fixR.handoff, perfFix && perfFix.handoff, ...q.registro, plano, deployExec].filter(Boolean))
   return {
-    modo, fix: fixR.handoff, gates: [{ nome: 'bugfix→tester', ok: fixR.gateOk, devolucoes: fixR.devolucoes }],
+    modo, fix: fixR.handoff, performance: perfFix && perfFix.handoff,
+    gates: [{ nome: 'bugfix→tester', ok: fixR.gateOk, devolucoes: fixR.devolucoes }].concat(perfFix ? [{ nome: 'bugfix-perf', ok: perfFix.gateOk, devolucoes: perfFix.devolucoes }] : []),
     qualidade: resumoQualidade(q), planoDeDeploy: plano, deployExecutado: deployExec,
     precisaAutorizacaoHumana: GATES_HUMANOS, kickoff: ecoKickoff(),
   }
@@ -357,6 +406,10 @@ if (modo === 'auditoria') {
       'AUDITORIA (só leitura + PoC inofensivo): RLS por role, auth server-side, IDOR/BOLA, webhooks, segredos, supply-chain' + (temLLM ? ', OWASP LLM Top 10' : '') + '. Relatório com severidade CVSS por achado e correção recomendada na raiz. NÃO corrija nada nesta rodada.',
       'o código/infra existente no repo', '', 'relatório com achados por severidade + roteamento sugerido'),
       { label: 'audit:seguranca', phase: 'Auditoria / Resgate', schema: HANDOFF }),
+    () => agent(comoSkill('/engenheiro-performance',
+      'AUDITORIA DE PERFORMANCE (só leitura + medição): Modo 1 etapas 0–5 + Checklist Mestre. Baseline obrigatório (p50/p95/p99). NÃO corrija nada nesta rodada. Relatório priorizado em docs/perf/.',
+      'o código/infra existente no repo', '', 'diagnóstico de performance com causas sistêmicas e ordem de ataque'),
+      { label: 'audit:performance', phase: 'Auditoria / Resgate', schema: HANDOFF }),
     () => agent(comoSkill('/qa-senior',
       'AUDITORIA DE QUALIDADE: o que funciona de verdade vs o que finge funcionar; cobertura e saúde dos testes; gaps de critérios de aceite; matriz de risco impacto×probabilidade; estratégia de teste recomendada.',
       'o código + testes existentes', '', 'diagnóstico de qualidade com matriz de risco e recomendações priorizadas'),
@@ -405,6 +458,10 @@ if (modo === 'resgate-de-projeto') {
       'AUDITORIA DO ESTADO REAL: o que funciona de verdade, o que finge funcionar, o que está quebrado silenciosamente. Rode/valide o que der. Sem otimismo: fatos.',
       'o repo como está', '', 'mapa fato-a-fato do que funciona/finge/quebrou'),
       { label: 'resgate:qa', phase: 'Auditoria / Resgate', schema: HANDOFF }),
+    () => agent(comoSkill('/engenheiro-performance',
+      'AVALIAÇÃO DE PERFORMANCE NO RESGATE: o sistema voa ou está no chão? Baseline, causas estruturais, o que vale otimizar vs reescrever. Evidência, não feeling. NÃO corrija nesta rodada.',
+      'o repo como está', '', 'veredito de performance com evidência: aproveitar/otimizar/refazer por área quente'),
+      { label: 'resgate:performance', phase: 'Auditoria / Resgate', schema: HANDOFF }),
   ]
   if (temUI) {
     thunks.push(() => agent(comoSkill(querMobile && !querWeb ? '/designer-saas-senior' : '/designer-sites-senior',
@@ -645,6 +702,25 @@ if (rodarSeguranca) {
   log(`Segurança: ${sec && sec.aprovado ? 'limpa ✅' : 'com achados em aberto ⚠️'} (${secRodadas} rodada(s) de correção).`)
 }
 
+// Estágio 7.5: Performance — depois da segurança, antes do tester
+let perfR = null
+if (tocaPerformance) {
+  phase('Performance')
+  const missaoPerf = (modo === 'projeto-do-zero')
+    ? 'MODO 1 — Auditoria Estrutural (etapas 0–9 + Checklist Mestre). Baseline, causa raiz compartilhada (não tela), correções de perf pura, gates no CI, relatório em docs/perf/. Inclua o Checklist de Liberação no fechamento. NÃO altere regra de negócio — isso é patch para /dev-senior.'
+    : 'MODO 2 — Gate de Feature: blocos relevantes do Checklist + orçamento da feature + baseline. Uma variável por vez. Re-meça nas mesmas condições. Blinde o ganho no CI. Relatório em docs/perf/.'
+  perfR = await despacharComGate('Performance', 'performance→tester',
+    'baseline medido com p50/p95/p99 (média sozinha não conta); causa raiz perfilada; correções de perf pura aplicadas OU patch roteado ao /dev-senior; antes×depois nas mesmas condições; gate automático no CI por ganho; relatório em docs/perf/',
+    faltas => agent(
+      comoSkill('/engenheiro-performance', missaoPerf + blocoDevolucao(faltas),
+        'código consolidado + PRD (orçamento) + estado pós-segurança', '',
+        'orçamento verde ou pendências com dono; docs/perf/ (Playbook 3)'),
+      { label: 'perf:gate', phase: 'Performance', schema: HANDOFF }))
+  if (perfR.handoff) registro.push(perfR.handoff)
+  resumoGates.push({ nome: 'performance', ok: perfR.gateOk, devolucoes: perfR.devolucoes })
+  log(`Performance: ${perfR.gateOk ? 'orçamento ok ✅' : 'com bloqueio ⚠️'} (${perfR.devolucoes} devolução(ões)).`)
+}
+
 // Estágio 8: Loop de qualidade (tester → QA, até APROVADA ou diagnóstico estrutural)
 const escopoTeste = modo === 'redesign'
   ? 'regressão VISUAL completa (baseline+diff, cross-viewport, cross-tema) + a suíte funcional INTEIRA (jornadas intactas — redesign que quebra fluxo é REPROVADA na hora)'
@@ -680,6 +756,7 @@ return {
   implementacao: impl,
   gateDeCraft: craftResultados,
   seguranca: sec ? { aprovado: sec.aprovado, faltas: sec.faltas, rodadas: secRodadas } : null,
+  performance: perfR ? { ok: perfR.gateOk, devolucoes: perfR.devolucoes, handoff: perfR.handoff } : null,
   qualidade: resumoQualidade(qualidade),
   polishFinal,
   planoDeDeploy: plano9,
@@ -696,7 +773,7 @@ return {
 // SUB-ROTINAS
 // ─────────────────────────────────────────────────────────────────────────────
 function ecoKickoff() {
-  return { brief, publico, plataforma, modo, temLLM, temPagamento, tocaSensivel, temMarca, autorizadoDeploy, dataCiclo, root: ROOT, maxLoops: MAX_LOOPS, maxDevolucoes: MAX_DEVOLUCOES }
+  return { brief, publico, plataforma, modo, temLLM, temPagamento, tocaSensivel, tocaPerformance, temMarca, autorizadoDeploy, dataCiclo, root: ROOT, maxLoops: MAX_LOOPS, maxDevolucoes: MAX_DEVOLUCOES }
 }
 
 function resumoQualidade(q) {

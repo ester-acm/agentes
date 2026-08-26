@@ -8,9 +8,10 @@ Aqui não há aplicação, build ou runtime: este repo guarda apenas os *prompts
 
 ```
 skills/
-├── dev/                      # os 11 especialistas + o orquestrador + catálogo de satélites
+├── dev/                      # os 12 especialistas + /equipe + /consolidar + catálogo de satélites
 ├── framer-motion-animator/   # skill de animação com Framer Motion
 └── impeccable/               # craft, auditoria e polish de frontend
+.cursor/skills/               # wrappers para comando /nome no Cursor (apontam para skills/dev/)
 .agents/skills/               # satélites instaladas via `npx skills add` (fonte de verdade)
 ```
 
@@ -30,14 +31,16 @@ Satélites **não** são membros do time: o especialista carrega `.agents/skills
 | `engenheiro-senior-produto` | A ponte design↔engenharia: features polidas, micro-interações, Stripe |
 | `engenheiro-ia` | LLM em produção: prompting, RAG (pgvector), tool use, evals, guardrails |
 | `engenheiro-seguranca` | Auditoria ofensiva + defensiva: OWASP, RLS, webhooks, LGPD, CVSS |
+| `engenheiro-performance` | Auditoria e gate de performance: baseline, p95/p99, causa estrutural, CI |
 | `tester` | SDET: Playwright, Maestro/Detox, Vitest, a11y, regressão visual, Lighthouse CI |
 | `qa-senior` | Estratégia de teste por risco, Gherkin, triagem de bugs, veredito binário |
 | `engenheiro-devops` | CI/CD, deploy reversível, migrations, observabilidade, SLO, incidentes |
 | `equipe` | Orquestrador: pipeline com gates, fan-out/fan-in e loop de qualidade |
+| `consolidar` | Secretário do `EQUIPE.md`: grava handoff de invocação solta — não despacha o time |
 | `skills-satelites` | Catálogo: qual especialista carrega cada satélite; comando → agente |
 | `designer-checklist-mestre` | Lei de auditoria de design (30 blocos) — operada pelos dois designers |
 
-`equipe` acompanha um `equipe.workflow.js` — o pipeline determinístico que encadeia os especialistas acima e pausa nos gates humanos (escopo, custo, produção, dados).
+`equipe` acompanha um `equipe.workflow.js` — o pipeline determinístico que encadeia os 12 especialistas, o gate de performance e o modo `consolidar` (só canvas), e pausa nos gates humanos (escopo, custo, produção, dados).
 
 ## Skills de frontend
 
@@ -59,7 +62,7 @@ Instaladas com `npx skills add`. Atualizar: `npx skills update` na raiz. Recorte
 
 ## Uso
 
-As skills são consumidas pelo Claude Code / Claude Agent SDK. Para usá-las, copie ou linke o diretório da skill para onde o seu agente procura skills (por exemplo `~/.claude/skills/` ou `.claude/skills/` do projeto) e invoque pelo nome — `/dev-senior`, `/impeccable`, `/equipe`.
+As skills são consumidas pelo Cursor (`.cursor/skills/` — comando `/nome`) e pelo Claude Code / Claude Agent SDK. No Cursor, invoque `/consolidar`, `/engenheiro-performance`, `/equipe`, `/dev-senior`, etc. No Claude Code, copie ou linke `skills/dev/<nome>.md` para `~/.claude/skills/<nome>/SKILL.md` (ou `.claude/skills/` do projeto).
 
 Os prompts estão em português; código, identificadores e commits, em inglês.
 

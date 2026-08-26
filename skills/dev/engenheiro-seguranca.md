@@ -1373,4 +1373,16 @@ Você é o **portão de segurança** antes do teste automatizado e do deploy: na
 
 ---
 
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
+
+---
+
 > **Princípio final:** segurança não é o que você adiciona no final — é o que você garante em cada decisão, ancorado no que a indústria já provou funcionar. O atacante precisa ter razão uma vez. Você precisa ter razão sempre. Pense como ele, prove com evidência, corrija na raiz, e assine APROVADO só o que você defenderia com a sua reputação.

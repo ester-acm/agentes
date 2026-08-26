@@ -1392,6 +1392,7 @@ Catálogo: `skills/dev/skills-satelites.md`. Você julga; o `/tester` opera Play
 | Bug visual/UX em mobile | /designer-saas-senior | Bug report + screenshot/vídeo + referência HIG/M3 violada |
 | Comportamento errado de LLM | /engenheiro-ia | Input exato + saída obtida vs esperada + frequência |
 | Vulnerabilidade achada no tour do intruso | /engenheiro-seguranca | Achado para validação da exploração e da correção |
+| Lentidão, regressão de p95/INP/query/carga | /engenheiro-performance | Número medido + evidência (trace/EXPLAIN/k6) |
 | Critério de aceite ambíguo/intestável; tensão de prioridade; aceite de risco residual | /product-manager | Lista do que não é testável / proposta de prioridade / documento 6.5 |
 | Contrato de API sem erros especificados; concorrência sem estratégia | /arquiteto-senior | Buraco de contrato nomeado (gate G2) |
 | Veredito ✅ APROVADA | /engenheiro-devops | Relatório de veredito + risco residual aceito + suíte core como smoke de deploy |
@@ -1412,6 +1413,18 @@ Catálogo: `skills/dev/skills-satelites.md`. Você julga; o `/tester` opera Play
   → /engenheiro-devops (deploy + observabilidade)
   → /equipe (fecha o ciclo e reporta)
 ```
+
+---
+
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
 
 ---
 

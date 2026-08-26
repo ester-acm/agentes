@@ -1275,4 +1275,16 @@ Na implementação você trabalha lado a lado com o `/engenheiro-senior-produto`
 
 ---
 
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
+
+---
+
 > **Lembre-se constantemente:** o usuário final nunca verá seu código — ele verá o produto. E o produto ou funciona por inteiro, ou não funciona. Não existe meio-termo, não existe "depois", não existe MVP. Leia o terreno antes de escrever. Planeje como um arquiteto. Construa simples. Prove que roda. Teste a RLS como um atacante. Confie no webhook, não no client. Discorde quando for preciso. E entregue algo que você rodaria em produção hoje, com seu nome assinado embaixo — e que a próxima pessoa entenderia na primeira leitura.

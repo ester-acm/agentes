@@ -126,6 +126,18 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | Threat model | `threat-model-analyst`, `tm7-threat-model` | copilot |
 | MCP / agente | `mcp-security-audit`, `mcp-implementation-security-review`, `agent-owasp-compliance` | copilot |
 
+### `/engenheiro-performance`
+
+| Trigger | Skill | Pacote |
+|---|---|---|
+| Query lenta / índice / EXPLAIN | `postgresql-optimization`, `sql-optimization`, `sql-queries`, `write-query` | KW + copilot |
+| Índice, RLS cara, `pg_stat_statements` | `supabase-postgres-best-practices` **depois** `supabase` | supabase |
+| Medir jornada web / requests por tela | `playwright-explore-website`, `chrome-devtools`, `playwright-generate-test` | copilot |
+| Gate no CI (bundle, Lighthouse, k6) | `github-actions-efficiency`, `github-actions-hardening` | copilot |
+| Review de SQL que vai mudar | `postgresql-code-review`, `sql-code-review` | copilot |
+
+**No fluxo:** depois da segurança, **antes** do `/tester`. Modo 1 (auditoria estrutural) no projeto-do-zero e no MODO 5; Modo 2 (gate de feature) na feature com UI/API/LLM; Modo 3 (release) no pré-deploy. Bugfix só se o bug é de lentidão.
+
 ### `/tester`
 
 | Trigger | Skill | Pacote |
@@ -164,6 +176,7 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | Auditar o stack de skills do projeto | `agent-skill-stack` | copilot |
 
 `/equipe` **não** opera satélites de ofício (banco, design, teste). Só roteia.
+`/consolidar` **não** entra no ciclo do maestro — só quando um especialista foi invocado solto.
 
 ---
 
@@ -180,6 +193,8 @@ Quando o usuário (ou um plugin) invoca um **comando**, `/equipe` despacha o esp
 | `/architecture` | `/arquiteto-senior` | `architecture` + `system-design` |
 | `/review` | `/dev-senior` (código) ou `/engenheiro-seguranca` (se o pedido é auditoria) | `code-review` / `security-review` |
 | `/debug` | `/dev-senior` | `debug` |
+| `/consolidar` | `/consolidar` (secretário — **não** despacha especialista) | skill homônima |
+| lentidão, p95, Core Web Vitals, carga | `/engenheiro-performance` | skill homônima |
 | `/incident` | `/engenheiro-devops` | `incident-response` |
 | `/deploy-checklist` | `/engenheiro-devops` | `deploy-checklist` |
 | `/critique` `/design-system` `/handoff` `/ux-copy` `/accessibility` | designer da plataforma | `design-critique` / `design-system` / `design-handoff` / `ux-copy` / `accessibility-review` |
@@ -207,6 +222,7 @@ Toda skill do recorte mapeia 1:1 para o agente da seção 1. Heurística se uma 
 | `prd`, `spec`, `gtm`, `roadmap`, `launch` | `/product-manager` |
 | `architect`, `adr`, `postgres`, `sql-`, `cloud-design`, `codebase-knowledge` | `/arquiteto-senior` |
 | `ui`, `design`, `slop`, `gsap`, `appstore`, `screenshot`, `landing` | designer da plataforma |
+| `perf`, `lighthouse`, `k6`, `web-vitals`, `query lenta`, `n+1` | `/engenheiro-performance` |
 | `git-`, `commit`, `branch`, `refactor`, `react19` | `/dev-senior` |
 | `prompt`, `eval`, `agentic`, `agent-governance` | `/engenheiro-ia` |
 | `security`, `secret`, `gdpr`, `threat`, `owasp`, `codeql`, `mcp-security` | `/engenheiro-seguranca` |
@@ -239,7 +255,7 @@ Não existem neste pacote (não instalar, não despachar): `prompt-builder` (use
 ```
 .agents/skills/<nome>/SKILL.md    ← instalado por `npx skills add` (descoberta do agente)
 skills/dev/skills-satelites.md    ← este catálogo (roteamento)
-skills/dev/*.md                   ← os 11 especialistas + /equipe
+skills/dev/*.md                   ← os 12 especialistas + /equipe + /consolidar
 ```
 
 Atualizar satélites: `npx skills update` na raiz. Recorte novo: instale com `--skill` e **adicione a linha neste catálogo + na seção SKILLS SATÉLITES do especialista**. Sem linha no catálogo, `/equipe` não despacha.

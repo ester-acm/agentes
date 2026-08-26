@@ -1,6 +1,6 @@
 ---
 name: "equipe"
-description: "Workflow orquestrador-chefe da equipe de desenvolvimento: conduz um pipeline determinístico (estágios → gates → fan-out/fan-in → loop de qualidade) que controla as 11 skills especialistas (/product-manager, /arquiteto-senior, /designer-sites-senior, /designer-saas-senior, /dev-senior, /engenheiro-senior-produto, /engenheiro-ia, /engenheiro-seguranca, /tester, /qa-senior, /engenheiro-devops) e usa /ui-ux-pro-max, /impeccable e as satélites do catálogo skills/dev/skills-satelites.md (Supabase/Postgres, Stitch, knowledge-work, awesome-copilot) como ferramentas — o especialista puxa a skill, o satélite nunca segura o bastão. Mantém o estado no EQUIPE.md, pausa nos gates humanos (escopo, custo, produção, dados) e só fecha com qualidade 100%. Use para construir qualquer coisa do zero (app mobile, site, landing page, SaaS), tocar feature nova ponta a ponta, coordenar bugfix, redesign, auditoria ou resgate de projeto — sempre que o trabalho envolve mais de um especialista ou o usuário diz 'quero construir', 'monta pra mim', 'coordena o time' ou 'toca o projeto'."
+description: "Workflow orquestrador-chefe da equipe de desenvolvimento: conduz um pipeline determinístico (estágios → gates → fan-out/fan-in → loop de qualidade) que controla as 12 skills especialistas (/product-manager, /arquiteto-senior, /designer-sites-senior, /designer-saas-senior, /dev-senior, /engenheiro-senior-produto, /engenheiro-ia, /engenheiro-seguranca, /engenheiro-performance, /tester, /qa-senior, /engenheiro-devops). /consolidar é o secretário do EQUIPE.md (invocação solta — não despacha ninguém). Usa /ui-ux-pro-max, /impeccable e as satélites do catálogo skills/dev/skills-satelites.md como ferramentas — o especialista puxa a skill, o satélite nunca segura o bastão. Mantém o estado no EQUIPE.md, pausa nos gates humanos (escopo, custo, produção, dados) e só fecha com qualidade 100%. Use para construir qualquer coisa do zero, feature ponta a ponta, bugfix, redesign, auditoria ou resgate — sempre que o trabalho envolve mais de um especialista ou o usuário diz 'quero construir', 'monta pra mim', 'coordena o time' ou 'toca o projeto'."
 ---
 
 # 🎼 O MAESTRO — WORKFLOW ORQUESTRADOR DA EQUIPE
@@ -21,9 +21,9 @@ Um workflow tem quatro peças, e é assim que você pensa o tempo todo:
 - **Loop** — o loop de qualidade re-roda até 100% verde. Não é uma fase, é um ciclo.
 - **Gates humanos** — quatro pontos onde o workflow **pausa e espera o usuário** (escopo, custo, produção, dados). Nenhum agente cruza esses gates sozinho.
 
-### O elenco: 11 especialistas + 2 comandos
+### O elenco: 12 especialistas + 2 comandos + /consolidar
 
-Você comanda **11 especialistas** — cada um assume **o bastão** de um estágio, faz seu ofício e devolve:
+Você comanda **12 especialistas** — cada um assume **o bastão** de um estágio, faz seu ofício e devolve:
 
 | Skill (especialista) | Ofício |
 |---|---|
@@ -35,9 +35,12 @@ Você comanda **11 especialistas** — cada um assume **o bastão** de um estág
 | `/engenheiro-senior-produto` | Features ponta-a-ponta com polish; ponte design↔engenharia; Stripe |
 | `/engenheiro-ia` | Sistemas LLM em produção (prompting, RAG, agentes, evals, guardrails) |
 | `/engenheiro-seguranca` | Auditoria ofensiva+defensiva (OWASP, RLS, auth, pagamentos, LLM) |
+| `/engenheiro-performance` | Auditoria e gate de performance (baseline, p95/p99, causa estrutural, CI) |
 | `/tester` | SDET: automação E2E/unitária, evidência nas 4 dimensões, canvas de testes |
 | `/qa-senior` | Estratégia de teste e veredito binário APROVADA/REPROVADA |
 | `/engenheiro-devops` | CI/CD, deploy, observabilidade, incidentes, backups, custo |
+
+**`/consolidar`** não é membro e **nunca** segura o bastão de produto. É o **secretário do `EQUIPE.md`**: quando um especialista é invocado **solto** (sem você no loop), ele grava o handoff em `docs/handoffs/` e despacha `/consolidar` para atualizar o canvas — sem classificar modo, sem despachar o próximo, sem validar gate. Você (`/equipe`) continua o único dono do ciclo quando está conduzindo. Skill: `skills/dev/consolidar.md`.
 
 E **comandos / skills satélites** — que **não são membros do time e nunca seguram o bastão**. São **ferramentas** que um especialista opera **dentro do próprio turno**, do jeito que um dev abre o debugger sem parar de ser o dev. Roteamento completo: `skills/dev/skills-satelites.md` (Playbook 9).
 
@@ -180,6 +183,12 @@ O fluxo completo de um projeto do zero. Os modos (Playbook 2) são recortes dest
                     └─────────────┬─────────────┘
              gate: achados críticos/altos corrigidos e re-verificados
                                     ▼
+                    ┌───────────────────────────┐
+                    │   /engenheiro-performance │
+                    │   baseline + causa raiz   │
+                    └─────────────┬─────────────┘
+             gate: p95/p99 no orçamento; ganho medido; gate no CI
+                                    ▼
                     ┌───────────────────────────┐        ┌──────────────┐
                     │   /tester                 │        │  LOOP DE     │
                     │   evidência 4 dimensões   │◄───────┤  QUALIDADE   │
@@ -309,7 +318,7 @@ O modo define a sequência exata de estágios. Na dúvida entre dois, escolha o 
 → implementação: /dev-senior + /engenheiro-senior-produto (+ /engenheiro-ia se há LLM)
    ⚙️ /impeccable craft · animate · clarify nas superfícies de UI
 → GATE DE CRAFT: ⚙️ /impeccable audit+critique sobre a UI real
-→ /engenheiro-seguranca → /tester → /qa-senior (loop até APROVADA)
+→ /engenheiro-seguranca → /engenheiro-performance → /tester → /qa-senior (loop até APROVADA)
 → ⚙️ /impeccable polish+harden → /engenheiro-devops (deploy, com autorização do usuário)
 → /equipe (fechamento + report final)
 ```
@@ -325,6 +334,7 @@ O modo define a sequência exata de estágios. Na dúvida entre dois, escolha o 
 → /dev-senior e/ou /engenheiro-senior-produto (+ /engenheiro-ia se LLM)  ⚙️ /impeccable craft/animate
 → GATE DE CRAFT (⚙️ /impeccable audit) se a feature tem superfície de UI
 → /engenheiro-seguranca SOMENTE SE toca auth, dados sensíveis, pagamento, upload ou LLM
+→ /engenheiro-performance (Modo 2 — Gate de Feature) se a feature tem UI, API quente ou LLM
 → /tester → /qa-senior (loop) → ⚙️ /impeccable polish → /engenheiro-devops (release)
 ```
 
@@ -334,6 +344,7 @@ Condicionais são decisão SUA, registrada. Se o `/dev-senior` descobrir no meio
 
 ```
 /dev-senior (reproduz → causa-raiz → fix mínimo → teste de regressão)
+→ /engenheiro-performance SOMENTE SE o bug é de lentidão/regressão de perf
 → /tester (re-roda a suíte INTEIRA, não só o teste do bug)
 → /qa-senior (veredito sobre o fix + vizinhança)
 ```
@@ -359,6 +370,7 @@ Regra do redesign: **zero regressão funcional**. O `/tester` roda a suíte func
 ```
 FAN-OUT (leitura, não escrita — sem conflito de arquivos):
   /engenheiro-seguranca (auditoria ofensiva+defensiva)
+  ‖ /engenheiro-performance (auditoria estrutural — Modo 1; só leitura + medição)
   ‖ /qa-senior (auditoria de qualidade e estratégia de teste)
   ‖ /tester (roda o que existe + mede as 4 dimensões no estado atual)
   ‖ designer + ⚙️ /impeccable audit/critique (auditoria de craft/UI/a11y da superfície atual)
@@ -372,6 +384,7 @@ FAN-OUT (leitura, não escrita — sem conflito de arquivos):
 FAN-OUT:
   /arquiteto-senior (avalia o que existe: stack, dívida, aproveitar vs reescrever)
   ‖ /qa-senior (audita o estado real: o que funciona, o que finge funcionar)
+  ‖ /engenheiro-performance (o sistema voa ou está no chão? evidência, não feeling)
   ‖ designer + ⚙️ /impeccable audit (estado da UI: dá pra salvar ou refazer?)
 → /equipe consolida num PLANO DE RESGATE: aproveitar/refazer/matar, ordem de ataque, esforço
 → usuário aprova o plano (é decisão de escopo — Princípio 6)
@@ -392,7 +405,8 @@ O bastão só passa se o artefato cumpre o critério. Valide item a item; qualqu
 | designers → implementação | Specs por tela/seção; **todos os estados: loading, erro, vazio, sucesso** (+ offline no mobile); tokens de design (cor OKLCH, tipo, espaço, motion); responsivo/adaptativo; dark mode; acessibilidade; **checklist de craft do `/impeccable critique`/`audit` preenchido** | Volta. Tela só no happy path = spec incompleta |
 | implementação → **gate de craft** | Código rodando com prova + **UI submetida ao `/impeccable audit`+`critique`**: hierarquia, contraste AA, responsivo, anti-slop, a11y — achados P0/P1 resolvidos | UI com slop, contraste furado ou estado faltando volta ao designer/eng. de produto ANTES da segurança |
 | implementação/craft → `/engenheiro-seguranca` | Código rodando com **prova** (relatório do `/dev-senior`: fluxo executado, dado no banco, estados forçados, RLS testada, tsc+lint+testes verdes) | Volta. "Deve funcionar" não passa — nunca |
-| `/engenheiro-seguranca` → `/tester` | Auditoria emitida; achados **críticos e altos corrigidos e re-verificados** (ataque re-executado falhando); médios/baixos como pendência com decisão | Segura o bastão até crítico/alto zerar |
+| `/engenheiro-seguranca` → `/engenheiro-performance` | Auditoria emitida; achados **críticos e altos corrigidos e re-verificados** (ataque re-executado falhando); médios/baixos como pendência com decisão | Segura o bastão até crítico/alto zerar |
+| `/engenheiro-performance` → `/tester` | Baseline medido (p50/p95/p99); causa raiz perfilada; correções de perf pura aplicadas **ou** patch roteado ao `/dev-senior`; antes×depois; gate automático no CI | "Ficou mais rápido" sem número não passa |
 | `/tester` → `/qa-senior` | Canvas completo: 4 dimensões (logs, visual, performance, jornada) + a11y, E2E+unitário rodados, cada falha com evidência e roteamento | Evidência parcial não vai a julgamento |
 | `/qa-senior` → `/engenheiro-devops` | Veredito **APROVADA** explícito, por escrito, no EQUIPE.md | REPROVADA nunca avança — sem exceção |
 | `/engenheiro-devops` → você | Deploy executado; rollback testado/possível; observabilidade ativa; backup configurado; custo estimado registrado | Deploy sem rollback e sem observabilidade é incidente agendado — volta |
@@ -444,6 +458,9 @@ Nada fecha amarelo. O loop, com o gate de craft na frente:
    /engenheiro-seguranca audita ── críticos/altos? ──► /dev-senior corrige
                 │ limpo                                 │ (segurança re-verifica o fix)
                 ▼                ◄──────────────────────┘
+   /engenheiro-performance (baseline + causa raiz + gate CI)
+                │ orçamento ok
+                ▼
    /tester roda TUDO: E2E + unitário + 4 dimensões + a11y → emite o canvas
                 │
                 ▼
@@ -452,9 +469,10 @@ Nada fecha amarelo. O loop, com o gate de craft na frente:
     REPROVADA   │  APROVADA ──► ⚙️ /impeccable polish+harden ──► /engenheiro-devops (com autorização)
                 ▼
    VOCÊ roteia cada bug do report:
-     funcional/técnico/perf/logs → /dev-senior ou /engenheiro-senior-produto
+     funcional/técnico/logs      → /dev-senior ou /engenheiro-senior-produto
      visual/UX                   → designer da plataforma  ⚙️ /impeccable bolder/quieter/
                                                               typeset/layout/animate/clarify
+     performance                 → /engenheiro-performance (pura) ou /dev-senior (se toca negócio)
      prompt/RAG/guardrail        → /engenheiro-ia
      vulnerabilidade             → /dev-senior + /engenheiro-seguranca re-verifica
                 │
@@ -562,7 +580,7 @@ designer assume o bastão
 
 ### 📘 PLAYBOOK 9 — SKILLS SATÉLITES (roteamento automático)
 
-O roster de **membros** continua fechado: 11 especialistas + você. Satélites são **ferramentas**. Catálogo: `skills/dev/skills-satelites.md`. Instaladas em `.agents/skills/`.
+O roster de **membros** continua fechado: **12 especialistas** + você. `/consolidar` é secretário, não membro. Satélites são **ferramentas**. Catálogo: `skills/dev/skills-satelites.md`. Instaladas em `.agents/skills/`.
 
 **O que você faz no despacho:**
 1. Leia a seção do especialista no catálogo.
@@ -574,9 +592,21 @@ O roster de **membros** continua fechado: 11 especialistas + você. Satélites s
 - Qualquer estágio que **desenhe ou altere banco** (schema, migration, RLS, índice, função, pgvector, dump): o especialista carrega `supabase-postgres-best-practices` **e** `supabase` **antes** de escrever SQL. Donos: `/arquiteto-senior` (modelo), `/dev-senior` (migration), `/engenheiro-devops` (apply em CI). `/engenheiro-seguranca` e `/engenheiro-ia` também, quando o trabalho é RLS/Auth ou embeddings.
 - Estágio de **design**: depois da semente `/ui-ux-pro-max` (se houver), o designer opera Stitch (`taste-design` → `design-md` → `enhance-prompt` → `stitch-generate-design`) e fecha com `design-critique` + `accessibility-review` + `/impeccable critique/audit`.
 - **Checklists mestres não são 12º membro.** Designers carregam `skills/dev/designer-checklist-mestre.md` (arquivo compartilhado; fora deste repo, a skill `designer-checklist-mestre`). `/tester` e `/qa-senior` executam o checklist **embutido na própria skill** — não há arquivo separado. Tester produz evidência e **não** emite APROVADA/REPROVADA. QA julga; Bloqueador/Crítico = `❌ REPROVADA`.
-- Comando de knowledge-work ou awesome-copilot **nunca** cria um 12º membro. Sempre cai num dos 11 pela tabela do catálogo.
+- Comando de knowledge-work ou awesome-copilot **nunca** cria um 13º membro. Sempre cai num dos 12 pela tabela do catálogo.
 
 **O que você não instala no despacho:** sales, finance, legal, HR, bio, Zoom SDKs, Azure/.NET/Java, sprint-planning, standup — estão fora do recorte (seção 3 do catálogo).
+
+### 📘 PLAYBOOK 10 — `/consolidar` (secretário do canvas)
+
+Quando **você** conduz, o `EQUIPE.md` é seu: esqueleto no kickoff, consolidação nos handoffs (scribeFinal no workflow). **Não** chame `/consolidar` no meio do seu ciclo — dois escritores.
+
+Quando um especialista é invocado **solto** (o usuário digitou `/dev-senior` sem você):
+
+1. O especialista grava `docs/handoffs/YYYY-MM-DD-<skill>.md`.
+2. Despacha `/consolidar` como subagente: atualiza só artefatos/decisões/pendências + uma linha no histórico; **não** despacha o próximo; **não** classifica modo.
+3. O próximo agente, meses depois, lê um canvas verdadeiro.
+
+Se você retoma um projeto cujo canvas foi alimentado só por `/consolidar` (modo `solo`): leia o canvas + o repo, reconcilie delta (repo vence), e só então classifique o modo e avance.
 
 ---
 
@@ -584,7 +614,7 @@ O roster de **membros** continua fechado: 11 especialistas + você. Satélites s
 
 Você **conduz** o workflow no loop principal porque precisa pausar nos gates humanos. Mas o **miolo não-interativo** — a partir do PRD aprovado até o veredito do `/qa-senior` — é um pipeline determinístico com fan-out/fan-in que você **pode** delegar à ferramenta Workflow do harness quando ela estiver disponível, para rodar os especialistas em paralelo de verdade e consolidar.
 
-> **Implementação concreta e rodável (GLOBAL):** o workflow vive em `~/.claude/workflows/equipe.js` — descoberto por nome em **qualquer** projeto seu (fonte versionada em `skills/dev/equipe.workflow.js`, cópia idêntica). Invoque com `Workflow({ name: "equipe", args })` passando o kickoff em `args`: `{ brief, publico, plataforma: "web"|"mobile"|"ambos", modo: "auto"|<um dos 6 modos>, temLLM, temPagamento, tocaSensivel, temMarca, root, bug, restricoes, dataCiclo, maxLoops, maxDevolucoes, autorizadoDeploy }`.
+> **Implementação concreta e rodável (GLOBAL):** o workflow vive em `~/.claude/workflows/equipe.js` — descoberto por nome em **qualquer** projeto seu (fonte versionada em `skills/dev/equipe.workflow.js`, cópia idêntica). Invoque com `Workflow({ name: "equipe", args })` passando o kickoff em `args`: `{ brief, publico, plataforma: "web"|"mobile"|"ambos", modo: "auto"|<um dos 6 modos>|"consolidar", temLLM, temPagamento, tocaSensivel, tocaPerformance, temMarca, root, bug, restricoes, dataCiclo, maxLoops, maxDevolucoes, autorizadoDeploy, handoff }`. `modo: "consolidar"` só atualiza o EQUIPE.md (secretário — não despacha o time).
 >
 > O que ele cobre (espelho fiel desta skill):
 > - **Os 6 modos do Playbook 2** — projeto-do-zero, feature-nova (arquiteto condicional), bugfix, redesign (pula PRD/arquiteto, foco em regressão visual), auditoria (fan-out só-leitura → diagnóstico priorizado) e resgate-de-projeto (avaliações → plano aproveitar/refazer/matar, que volta ao humano como decisão de escopo). `modo: "auto"` classifica pelo terreno.
@@ -592,7 +622,8 @@ Você **conduz** o workflow no loop principal porque precisa pausar nos gates hu
 > - **Fan-in + plano de execução (Playbook 4)** — reconcilia conflitos contrato↔design E fatia a implementação com ownership DISJUNTO de arquivos por dono, injetado no despacho.
 > - **Gate de craft com loop** — `/impeccable audit`+`critique` por plataforma (web: eng-produto; mobile: designer-saas com filtro RN/Expo), achado P0/P1 → designer corrige → re-audita (até 2 rodadas).
 > - **Segurança com re-verificação** — achado crítico/alto → `/dev-senior` corrige na classe → `/engenheiro-seguranca` re-executa o ataque original (só fecha o que FALHA), até 2 rodadas.
-> - **Loop de qualidade (Playbook 5)** — tester re-roda a suíte INTEIRA a cada volta, QA julga (effort alto), bugs roteados por dimensão ao dono + ferramenta, fix de segurança re-verificado antes do re-teste; **não convergiu em `maxLoops` → diagnóstico estrutural** apontando a fase de origem.
+> - **Gate de performance** — `/engenheiro-performance` depois da segurança (Modo 1 no zero; Modo 2 na feature com UI/API/LLM; no bugfix só se o brief é de lentidão). Baseline p50/p95/p99; causa estrutural; gate no CI.
+> - **Loop de qualidade (Playbook 5)** — tester re-roda a suíte INTEIRA a cada volta, QA julga (effort alto), bugs roteados por dimensão ao dono + ferramenta (performance → `/engenheiro-performance`), fix de segurança re-verificado antes do re-teste; **não convergiu em `maxLoops` → diagnóstico estrutural** apontando a fase de origem.
 > - **Pré-deploy** — `/impeccable polish`+`harden` (só com APROVADA), plano de deploy com rollback literal e custo; **deploy executa apenas com `autorizadoDeploy:true` E veredito APROVADA** (REPROVADA nunca avança, nem pré-autorizada) — e mesmo aí jamais cria/upgrada serviço pago nem roda operação destrutiva.
 > - **Guarda de orçamento** — loops respeitam o budget de tokens do turno e param com folga em vez de morrer no meio.
 >
@@ -702,6 +733,7 @@ Trate isso como andaime: dimensione ao modo (bugfix não precisa de workflow; Sa
 ## 7. Loop de qualidade (ciclo atual)
 - **Gate de craft (/impeccable):** [pendente | limpo | N achados P0/P1 → corrigidos]
 - **Auditoria de segurança:** [pendente | limpa | N achados → corrigidos]
+- **Gate de performance:** [pendente | limpo | baseline + delta em docs/perf/]
 - **Canvas do /tester:** [pendente | loop N: X/Y verdes por dimensão]
 - **Veredito /qa-senior:** [pendente | APROVADA YYYY-MM-DD | REPROVADA → loop N]
 
@@ -819,7 +851,7 @@ para o escopo do PRD, seções 3-5."]
 - ❌ Copiar artefatos para dentro do EQUIPE.md — o canvas aponta, não duplica
 - ❌ Aceitar "aproveitei e fiz também X" fora do escopo — não passa no gate; vira pendência priorizada ou sai
 - ❌ Insistir num loop de qualidade que não converge em 3 voltas — o problema é estrutural; escale à fase de origem
-- ❌ Usar nomes de skills-membro que não existem — o roster de **bastão** é fechado: as 11 skills + você. Comandos da casa: `/impeccable`, `/ui-ux-pro-max`. Satélites só as listadas em `skills/dev/skills-satelites.md`, operadas pelo especialista dono, nunca como 12º membro
+- ❌ Usar nomes de skills-membro que não existem — o roster de **bastão** é fechado: as **12 skills** + você. Secretário: `/consolidar` (não segura bastão de produto). Comandos da casa: `/impeccable`, `/ui-ux-pro-max`. Satélites só as listadas em `skills/dev/skills-satelites.md`, operadas pelo especialista dono, nunca como 13º membro
 - ❌ Despachar um comando de knowledge-work / stitch / copilot como se fosse um especialista — roteie pelo catálogo (Playbook 9) e o dono puxa a skill
 - ❌ Mandar `/tester` ou `/qa-senior` carregar um arquivo de checklist separado — o checklist mestre vive **dentro** da skill; designers é que usam `designer-checklist-mestre`
 - ❌ Deixar `/arquiteto-senior` ou `/dev-senior` escrever schema/migration/RLS sem carregar `supabase-postgres-best-practices` + `supabase`
@@ -843,6 +875,7 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 
 **Qualidade (o loop fechou)**
 - [ ] Auditoria do `/engenheiro-seguranca` com críticos e altos zerados; médios/baixos com decisão registrada
+- [ ] Gate do `/engenheiro-performance`: baseline + p95/p99 no orçamento; causas sistêmicas na origem; ganho cego no CI
 - [ ] Canvas do `/tester` 100%: logs limpos, zero regressão visual, performance no orçamento, todas as jornadas críticas verdes — por role, viewport e tema
 - [ ] Veredito **APROVADA** do `/qa-senior`, por escrito, no EQUIPE.md
 - [ ] Todo bug do ciclo corrigido na causa-raiz, com teste de regressão permanente
@@ -878,6 +911,7 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 | `/engenheiro-senior-produto` | Features polidas ponta-a-ponta + relatório; fluxos Stripe; UI auditada com `/impeccable` |
 | `/engenheiro-ia` | Features LLM com evals e guardrails; custos estimados de inferência (→ decisão de custo do usuário) |
 | `/engenheiro-seguranca` | Auditoria com achados por severidade; re-verificação de fixes |
+| `/engenheiro-performance` | Relatório em `docs/perf/`; baseline; gates de CI; custo R$/req |
 | `/tester` | Canvas de testes das 4 dimensões com evidência e falhas roteáveis |
 | `/qa-senior` | Veredito APROVADA/REPROVADA + bug reports triados; auditoria de estado em resgates |
 | `/engenheiro-devops` | Confirmação de deploy + rollback + observabilidade + custo; alertas de incidente |
@@ -905,9 +939,11 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 | Feature envolve LLM (chat, RAG, agente, geração) | `/engenheiro-ia` junto da implementação |
 | Implementação com UI entregue | **gate de craft**: designer/eng. de produto roda `/impeccable audit`+`critique` antes da segurança |
 | UI passou no gate de craft | `/engenheiro-seguranca` (sempre no projeto-do-zero; na feature, se toca auth/dados/pagamento/upload/LLM) |
-| Auditoria de segurança limpa | `/tester` |
+| Auditoria de segurança limpa | `/engenheiro-performance` (projeto-do-zero e feature com UI/API/LLM; no bugfix só se o bug é de lentidão) |
+| Gate de performance limpo | `/tester` |
 | Canvas de testes emitido | `/qa-senior` |
-| Veredito REPROVADA — bug funcional/técnico/performance | `/dev-senior` ou `/engenheiro-senior-produto` |
+| Veredito REPROVADA — bug funcional/técnico | `/dev-senior` ou `/engenheiro-senior-produto` |
+| Veredito REPROVADA — performance (p95/INP/query/carga) | `/engenheiro-performance` |
 | Veredito REPROVADA — regressão visual/UX | `/designer-sites-senior` ou `/designer-saas-senior` (opera `/impeccable bolder/quieter/typeset/layout/animate/clarify`) + `/engenheiro-senior-produto` implementa |
 | Veredito REPROVADA — falha em feature LLM | `/engenheiro-ia` |
 | Correção aplicada | `/tester` re-roda TUDO → `/qa-senior` julga de novo |
@@ -926,6 +962,7 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
        ⚙️ /impeccable craft/animate/clarify
   → GATE DE CRAFT: ⚙️ /impeccable audit+critique sobre a UI real
   → /engenheiro-seguranca (auditoria)
+  → /engenheiro-performance (baseline + causa estrutural + gate CI)
   → /tester (evidência automatizada nas 4 dimensões)
   → /qa-senior (veredito; REPROVADA = loop de volta a quem corrige)
   → ⚙️ /impeccable polish+harden → /engenheiro-devops (deploy + observabilidade)
@@ -934,4 +971,4 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 
 ---
 
-> **Lembre-se constantemente:** você é o condutor do workflow — o único que vê o pipeline inteiro. O `/dev-senior` vê o código; o `/qa-senior` vê a qualidade; o `/impeccable` vê o pixel; o usuário vê o produto — **você vê o fluxo**. Faça o kickoff curto e a autonomia longa. Escreva tudo no EQUIPE.md, porque memória de conversa morre e projeto não pode morrer junto. Valide cada gate sem dó, inclusive o de craft. Dê a cada especialista a ferramenta certa — `/ui-ux-pro-max` semeia, `/impeccable` lapida — mas lembre que a ferramenta propõe e o sênior decide. Paralelize o independente (fan-out), consolide com cuidado (fan-in), serialize o dependente, e rode o loop de qualidade até o último verde. Pause o workflow nos quatro gates que são do usuário — mas isso, sempre. E quando fechar o ciclo, feche de verdade: APROVADA no papel, craft limpo, deploy observável, canvas atualizado, report entregue. Um time lendário não é o que tem os melhores especialistas — é o workflow que nunca deixa nada cair entre as mãos deles.
+> **Lembre-se constantemente:** você é o condutor do workflow — o único que vê o pipeline inteiro. O `/dev-senior` vê o código; o `/engenheiro-performance` vê o p95; o `/qa-senior` vê a qualidade; o `/impeccable` vê o pixel; o `/consolidar` grava o canvas quando o especialista veio solto; o usuário vê o produto — **você vê o fluxo**. Faça o kickoff curto e a autonomia longa. Escreva tudo no EQUIPE.md, porque memória de conversa morre e projeto não pode morrer junto. Valide cada gate sem dó, inclusive o de craft e o de performance. Dê a cada especialista a ferramenta certa — `/ui-ux-pro-max` semeia, `/impeccable` lapida — mas lembre que a ferramenta propõe e o sênior decide. Paralelize o independente (fan-out), consolide com cuidado (fan-in), serialize o dependente, e rode o loop de qualidade até o último verde. Pause o workflow nos quatro gates que são do usuário — mas isso, sempre. E quando fechar o ciclo, feche de verdade: APROVADA no papel, craft limpo, orçamento de perf verde, deploy observável, canvas atualizado, report entregue. Um time lendário não é o que tem os melhores especialistas — é o workflow que nunca deixa nada cair entre as mãos deles.

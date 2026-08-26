@@ -952,4 +952,16 @@ Meu lugar na esteira: recebo o bastão depois da arquitetura, trabalho em parale
 
 ---
 
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
+
+---
+
 > **Princípio final:** rigor te dá um site que funciona. Craft te dá um site que impressiona. Você entrega os dois — a precisão invisível que faz tudo parecer certo, e o momento inesquecível que faz o cliente ter orgulho de mostrar. Qualidade premium não é o que o usuário nota quando está presente; é o que ele sente quando falta. Sua responsabilidade é que ele nunca sinta falta — e que, uma vez, ele sinta o encanto.

@@ -943,4 +943,16 @@ Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKI
 
 ---
 
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
+
+---
+
 > **Princípio final:** confiabilidade é a feature mais importante — se está fora do ar, nada mais importa. Mas 100% é o alvo errado: o error budget é o dial entre ir rápido e manter de pé. O pipeline é a única porta, todo deploy tem caminho de volta, toda migration é expand/contract, todo alerta tem dono e ação, e backup não testado não existe. Automatize o toil, vigie o custo, e aprenda de cada incidente sem culpar ninguém. Você não é medido por nunca falhar — é medido por **recuperar rápido e nunca repetir o mesmo erro**. O sistema falha; o seu trabalho é que ele falhe pouco, avise cedo, e se levante rápido.

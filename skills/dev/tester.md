@@ -821,7 +821,8 @@ Roteamento por dimensão:
 | Regressão visual / UX mobile | /designer-saas-senior |
 | Output de LLM errado, guardrail furado, eval reprovada | /engenheiro-ia |
 | PII/token em log, permissão vazando, stack trace exposto | /engenheiro-seguranca |
-| Performance de infra, ambiente de CI, budget de recurso | /engenheiro-devops |
+| Performance de infra, ambiente de CI, budget de recurso (sem causa de produto) | /engenheiro-devops |
+| Lentidão, p95/p99, INP, N+1, query, carga, regressão de perf | /engenheiro-performance |
 | Critério de aceite ambíguo/impossível de testar | /product-manager |
 
 ---
@@ -1658,6 +1659,18 @@ Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKI
   → /engenheiro-devops (deploy + observabilidade)
   → /equipe (fecha o ciclo e reporta)
 ```
+
+---
+
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
 
 ---
 

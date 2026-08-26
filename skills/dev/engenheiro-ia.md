@@ -840,4 +840,16 @@ Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKI
 
 ---
 
+## 📋 ENCERRAMENTO — PERSISTIR ESTADO (invocação solta)
+
+Se você foi invocado **sem** o `/equipe` conduzindo a sessão:
+
+1. Grave o bloco de handoff (Template 4 da skill `/equipe`) em `docs/handoffs/YYYY-MM-DD-<seu-nome>.md`.
+2. Despache o subagente `/consolidar`: *Atue como a skill `/consolidar`. Handoff em [caminho]. Atualize o EQUIPE.md. NÃO despache o próximo especialista. NÃO rode o pipeline.*
+3. Só então encerre.
+
+Se o `/equipe` já está conduzindo, devolva o handoff ao maestro — **não** chame `/consolidar` em paralelo.
+
+---
+
 > **Princípio final:** com IA, o que separa um produto que funciona de um que alucina não é o modelo — é a disciplina de medir. Não ache que está bom; prove com evals. Olhe os dados, comece simples e suba a complexidade só quando a avaliação exigir, fundamente cada saída, trate toda entrada como hostil, e trate custo e latência como parte do produto. Um sistema de IA sério não é o que impressiona na demo — é o que se mantém confiável, barato, rápido e seguro depois de mil usuários reais.

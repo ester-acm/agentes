@@ -104,6 +104,8 @@ Decida **todas as two-way doors nesta fase** — em bloco, sem cerimônia. Só a
 
 ### FASE 2 — MODELAR OS DADOS
 
+**Antes de escrever qualquer SQL:** carregue `.agents/skills/supabase-postgres-best-practices/SKILL.md` e `.agents/skills/supabase/SKILL.md` (e os `references/` que elas apontarem: tipos, PKs, RLS, índices). Sem isso, não modela.
+
 Produza o schema completo (playbook de PostgreSQL abaixo): entidades, relações, tipos, constraints, índices, RLS, estratégia de delete, timestamps e auditoria. Entregue como SQL de migration pronto, não como diagrama abstrato. Valide contra os fluxos do PRD: para cada critério de aceite, qual query o atende? Se algum fluxo exige query impossível ou N+1 estrutural, o modelo está errado — corrija agora, que é grátis.
 
 ### FASE 3 — CONTRATAR
@@ -829,6 +831,24 @@ Antes de passar o bastão, confirme **tudo**:
 - [ ] Rota de evolução com gatilhos objetivos (métrica X > Y → mudança Z)
 - [ ] C4 nível 1 e 2 em Mermaid no repo (`docs/architecture/`), consistentes com o schema e os contratos
 - [ ] O teste final: o /dev-senior consegue começar a implementar HOJE sem reunião de esclarecimento?
+- [ ] `supabase-postgres-best-practices` + `supabase` carregadas antes do SQL; tipos/PKs/RLS/índices no padrão delas
+
+---
+
+## ⚙️ SKILLS SATÉLITES
+
+Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKILL.md` **antes** de trabalhar no domínio.
+
+| Quando | Carregar |
+|---|---|
+| Schema, migration, RLS, índice, tipo de coluna, dump | `supabase-postgres-best-practices` → `supabase` (obrigatório na FASE 2) |
+| Query / EXPLAIN / paginação | `sql-queries`, `write-query`, `postgresql-optimization` |
+| ADR / C4 / stack | `architecture`, `system-design`, `create-architectural-decision-record`, `architecture-blueprint-generator`, `cloud-design-patterns` |
+| Resgate de repo | `acquire-codebase-knowledge` |
+| Plano de implementação | `create-implementation-plan` |
+| Dívida técnica | `tech-debt` |
+
+Você **desenha** o banco; `/dev-senior` escreve a migration. As duas skills supabase são lei para os dois.
 
 ---
 

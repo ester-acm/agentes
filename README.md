@@ -8,12 +8,15 @@ Aqui não há aplicação, build ou runtime: este repo guarda apenas os *prompts
 
 ```
 skills/
-├── dev/                      # os 11 especialistas + o orquestrador
+├── dev/                      # os 11 especialistas + o orquestrador + catálogo de satélites
 ├── framer-motion-animator/   # skill de animação com Framer Motion
 └── impeccable/               # craft, auditoria e polish de frontend
+.agents/skills/               # satélites instaladas via `npx skills add` (fonte de verdade)
 ```
 
-Cada skill é um arquivo markdown com frontmatter (`name`, `description`) seguido do system prompt. A `description` é o que decide quando o agente é acionado — ela é lida pelo modelo para escolher a skill certa.
+Cada skill de especialista é um arquivo markdown com frontmatter (`name`, `description`) seguido do system prompt. A `description` é o que decide quando o agente é acionado — ela é lida pelo modelo para escolher a skill certa.
+
+Satélites **não** são membros do time: o especialista carrega `.agents/skills/<nome>/SKILL.md` dentro do próprio turno. Roteamento (quem puxa o quê, comando → agente): `skills/dev/skills-satelites.md`.
 
 ## O time (`skills/dev/`)
 
@@ -31,6 +34,8 @@ Cada skill é um arquivo markdown com frontmatter (`name`, `description`) seguid
 | `qa-senior` | Estratégia de teste por risco, Gherkin, triagem de bugs, veredito binário |
 | `engenheiro-devops` | CI/CD, deploy reversível, migrations, observabilidade, SLO, incidentes |
 | `equipe` | Orquestrador: pipeline com gates, fan-out/fan-in e loop de qualidade |
+| `skills-satelites` | Catálogo: qual especialista carrega cada satélite; comando → agente |
+| `designer-checklist-mestre` | Lei de auditoria de design (30 blocos) — operada pelos dois designers |
 
 `equipe` acompanha um `equipe.workflow.js` — o pipeline determinístico que encadeia os especialistas acima e pausa nos gates humanos (escopo, custo, produção, dados).
 
@@ -38,6 +43,19 @@ Cada skill é um arquivo markdown com frontmatter (`name`, `description`) seguid
 
 - **`impeccable`** — a mais completa do repo: além do `SKILL.md`, traz `reference/` (audit, critique, polish, harden, animate, colorize, typeset, layout…), `scripts/` com detector de anti-patterns (engines regex, HTML estático, browser e contraste visual) e `agents/`.
 - **`framer-motion-animator`** — transições de página, gestos, animações por scroll e sequências orquestradas.
+
+## Skills satélites (`.agents/skills/`)
+
+Instaladas com `npx skills add`. Atualizar: `npx skills update` na raiz. Recorte novo entra no catálogo `skills/dev/skills-satelites.md` **e** na seção SKILLS SATÉLITES do especialista dono.
+
+| Pacote | Recorte | Quem opera |
+|---|---|---|
+| `supabase/agent-skills` | `supabase`, `supabase-postgres-best-practices` | Quem **modifica o banco**: `/arquiteto-senior` (desenho), `/dev-senior` (migration), `/engenheiro-devops` (CI); segurança/IA quando RLS/pgvector |
+| `google-labs-code/stitch-skills` | Stitch (generate-design, taste-design, design-md, react-native, react-components, …) | Designers; engenheiro de produto / dev na hora de virar código |
+| `anthropics/knowledge-work-plugins` | Só o recorte de produto/engenharia/design (spec, ADR, critique, a11y, SQL, incidente, SEO…). Sales, legal, HR, Zoom, standup **fora** | O especialista da tabela comando→agente no catálogo |
+| `github/awesome-copilot` | Recorte da stack da casa (PRD, GTM, Postgres, Playwright, GitHub Actions, eval/prompt, security-review…). Azure/.NET/Java **fora** | Idem — heurística no catálogo se uma skill nova aparecer |
+
+`shadcn-ui`, `remotion` e `react-vite-dashboard` estão instalados mas **não** são o padrão da casa (OKLCH/tokens próprios) — só se o PRD/ADR pedir.
 
 ## Uso
 

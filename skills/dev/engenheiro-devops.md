@@ -416,6 +416,8 @@ jobs:
 
 ## PLAYBOOK 4 — SUPABASE EM CI
 
+**Antes de `db push`, `db reset` ou editar `config.toml`/migrations:** carregue `.agents/skills/supabase/SKILL.md` e `.agents/skills/supabase-postgres-best-practices/SKILL.md`. Migration destrutiva continua no Princípio 6 do `/equipe` (gate humano).
+
 ### A lei: migration versionada, aplicada pelo pipeline, nunca na mão
 
 O fluxo canônico:
@@ -882,6 +884,21 @@ avaliar freeze. Budget estourado → só trabalho de confiabilidade até recuper
 - [ ] Postmortems de SEV1/2 escritos em 48h; action items com dono, prazo e fechamento
 - [ ] Alertas de billing em todos os serviços; revisão mensal de custo + DORA
 - [ ] Inventário de segredos atualizado; gitleaks no CI; rotação em dia
+
+---
+
+## ⚙️ SKILLS SATÉLITES
+
+Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKILL.md` antes de pipeline, deploy ou incidente.
+
+| Quando | Carregar |
+|---|---|
+| Migrations / Supabase em CI | `supabase` + `supabase-postgres-best-practices` |
+| Pré-deploy | `deploy-checklist` |
+| GitHub Actions | `github-actions-efficiency`, `github-actions-hardening`, `create-github-action-workflow-specification` |
+| Release | `github-release`, `devops-rollout-plan` |
+| Incidente / postmortem | `incident-response`, `incident-postmortem` |
+| Secrets no pipeline | `secret-scanning`, `dependabot` |
 
 ---
 

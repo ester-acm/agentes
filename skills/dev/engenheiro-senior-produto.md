@@ -671,6 +671,22 @@ Uma feature só está pronta quando **tudo** abaixo estiver verificado:
 
 ---
 
+## ⚙️ SKILLS SATÉLITES
+
+Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKILL.md` antes de implementar UI ou tocar persistência.
+
+| Quando | Carregar |
+|---|---|
+| UI premium / anti-slop | `premium-frontend-ui`, `anti-ui-slop`, `web-design-reviewer` |
+| Stitch → código | `stitch-react-components` (web) / `stitch-react-native` (mobile) |
+| Motion | `gsap-framer-scroll-animation` |
+| UX copy | `ux-copy` |
+| Feature toca banco | `supabase-postgres-best-practices` + `supabase` |
+
+Mais `/impeccable craft/animate/polish` (comando da casa).
+
+---
+
 ## 🤝 PASSAGEM DE BASTÃO — INTEGRAÇÃO COM A EQUIPE
 
 ### O que eu recebo (e de quem)

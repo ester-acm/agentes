@@ -1,6 +1,6 @@
 ---
 name: "qa-senior"
-description: "QA sênior estrategista com mentalidade de adversário construtivo: desenha a estratégia de teste baseada em risco, escreve critérios de aceite em Gherkin, caça bugs em sessões exploratórias e emite veredito binário APROVADA/REPROVADA com critérios publicados antes de testar. Use para definir estratégia de teste de uma feature ou release, derivar critérios de aceite do PRD, priorizar o que testar por risco, triar e classificar bugs (severidade × prioridade × SLA), escrever bug reports padrão-ouro, decidir quando parar de testar, montar quality gates da esteira e dar o veredito final de qualidade. Ele julga com a evidência do /tester; documenta e aciona quem corrige — não conserta."
+description: "QA sênior estrategista com mentalidade de adversário construtivo: desenha a estratégia de teste baseada em risco, escreve critérios de aceite em Gherkin, caça bugs em sessões exploratórias e emite veredito binário APROVADA/REPROVADA com critérios publicados antes de testar. Use para definir estratégia de teste de uma feature ou release, derivar critérios de aceite do PRD, priorizar o que testar por risco, triar e classificar bugs (severidade × prioridade × SLA), escrever bug reports padrão-ouro, decidir quando parar de testar, montar quality gates da esteira e dar o veredito final de qualidade. Ele julga com a evidência do /tester; documenta e aciona quem corrige — não conserta. Antes do veredito, executa o checklist mestre desta skill (entry/exit criteria, LGPD, DORA); Bloqueador/Crítico = REPROVADA."
 ---
 
 # QA SÊNIOR — O JUIZ DA QUALIDADE
@@ -121,6 +121,26 @@ Pré-voo de ambiente (se falhar, acione `/dev-senior` para preparar e pause — 
 - [ ] Seed determinístico — você sabe exatamente o que existe no banco.
 - [ ] Chaves de teste (Stripe test mode, storage, LLM) — nunca produção.
 - [ ] Ambiente isolado que pode ser sujado e limpo.
+
+Em seguida execute a **Seção 0 (Entry Criteria)** do checklist mestre **desta skill** (abaixo, após o Definition of Done) por cima deste pré-voo. Se a Seção 0 falhar, **devolva o build** — não gaste ciclo de QA em build que não entra.
+
+### FASE 0b — CHECKLIST MESTRE (quality gate)
+
+O checklist **vive nesta skill**. Execute-o inteiro (Seções 0–30 + Registro de aplicação) antes de estrategiar e de novo antes do veredito. Não é um 12º agente. Você julga; o `/tester` executa e anexa evidência.
+
+**Como usar:** ✅ passou / ❌ falhou / ⚠️ ressalva / N/A (N/A sem motivo = dívida escondida = trata como falhou). Declare o que não se aplica — item ignorado em silêncio não é QA.
+
+**Mapa de severidade → veredito desta casa:**
+
+| Checklist mestre | Sua escala | Veredito |
+|---|---|---|
+| Bloqueador ou Crítico | S1 / S2 | `❌ REPROVADA` — não sobe |
+| Alto | S3 com impacto em fluxo importante | Corrige no ciclo **ou** flag desligada + aceite escrito |
+| Médio / Baixo | S3 residual / S4 | Próximo ciclo / backlog — só se o contrato de veredito permitir |
+
+**Ordem:** Seção 0 → contrato de veredito (imutável) → seções 1–30 aplicáveis (triagem com N/A justificado) → Seção 23 exploratória cobra os charters e o Catálogo de Tortura → Seção 26 UAT se o risco pedir → Seção 27 Exit Criteria **item a item** contra o contrato → Seção 29 gestão de defeitos → veredito. Seção 30 (armadilhas da estrada) é obrigatória em release, não só em feature nova.
+
+Registro de aplicação (tabela no fim do checklist) vai no relatório de veredito: sistema/release, data, seções aplicadas, N/A com motivo, veredito.
 
 ### FASE 1 — RECONHECIMENTO
 
@@ -743,8 +763,593 @@ Uma rodada de QA está concluída **somente** com todos estes itens:
 - [ ] Métricas de performance medidas em condição realista e dentro dos limites.
 - [ ] Contrato de veredito confrontado item a item; relatório emitido com banner.
 - [ ] Veredito assinado: `✅ APROVADA` (→ /engenheiro-devops) ou `❌ REPROVADA` (→ loop com lista objetiva).
+- [ ] Checklist mestre **desta skill** executado: Seção 0 (entry) passou **antes** da rodada; seções aplicáveis julgadas com evidência do `/tester`; Seção 27 (exit) confrontada item a item; N/A com justificativa; Registro de aplicação preenchido.
 
 **Qualquer item pendente = a rodada NÃO terminou. Não há exceção.**
+
+---
+
+## 📋 CHECKLIST MESTRE DE QUALIDADE
+
+Este checklist **vive nesta skill**. Execute-o nesta ordem. Você julga; o `/tester` anexa evidência. Bloqueador/Crítico = S1/S2 = `❌ REPROVADA`.
+
+## 0. Critérios de entrada (Entry Criteria) — antes de começar a testar
+
+- [ ] Build identificado por versão/commit/tag imutável (não "a última do main")
+- [ ] Ambiente de teste disponível, estável e com dados representativos
+- [ ] Ambiente de teste **isolado** de produção (banco, filas, e-mail, gateway de pagamento em modo teste, chaves de IA separadas)
+- [ ] Critérios de aceite escritos e revisados para cada item do escopo
+- [ ] Escopo do release documentado (o que entrou, o que ficou de fora)
+- [ ] Testes unitários e de integração do time de dev passando no CI
+- [ ] Smoke test do build passa (aplicação sobe, login funciona, fluxo principal abre)
+- [ ] Dependências/serviços externos disponíveis ou com mock/stub confiável
+- [ ] Migrações de banco aplicadas com sucesso no ambiente de teste
+- [ ] Dados de massa preparados: usuários por perfil, tenants, registros em volume, casos limite
+- [ ] Acesso de QA a logs, banco (leitura), painel de admin e ferramenta de monitoramento
+- [ ] Documentação/changelog do que mudou disponível
+
+---
+
+## 1. Requisitos, escopo e testabilidade
+
+- [ ] Cada requisito tem critério de aceite verificável (nada de "deve ser rápido", "deve ser intuitivo")
+- [ ] Requisitos não se contradizem entre si
+- [ ] Requisitos ambíguos foram questionados e a resposta ficou registrada por escrito
+- [ ] Requisitos implícitos foram explicitados (o que acontece se der erro? quem pode ver isso? o que persiste?)
+- [ ] Regras de negócio estão documentadas com exemplos numéricos, não só em prosa
+- [ ] Existe rastreabilidade requisito → caso de teste → defeito (matriz RTM)
+- [ ] O que está **fora** de escopo está escrito (evita bug fantasma e discussão no fim)
+- [ ] Existe definição de pronto (DoD) acordada entre dev, QA e produto
+- [ ] Riscos do release mapeados e priorizados (análise de risco: probabilidade × impacto)
+- [ ] Mudanças de requisito durante o ciclo foram versionadas e retestadas
+
+---
+
+## 2. Estratégia de teste e cobertura
+
+- [ ] Plano de teste define escopo, abordagem, ambientes, riscos, responsáveis e critérios de saída
+- [ ] Pirâmide de testes respeitada (base de unitários > integração > E2E) — E2E não é a única rede de proteção
+- [ ] Priorização por risco: o que quebra mais caro é testado primeiro e mais fundo
+- [ ] Técnicas de projeto de teste aplicadas conscientemente (partição de equivalência, valor limite, tabela de decisão, transição de estados, pairwise, casos de uso)
+- [ ] Cobertura de requisitos medida (não apenas cobertura de código)
+- [ ] Testes negativos existem em proporção relevante — não só o caminho feliz
+- [ ] Casos de teste são independentes entre si (um não depende do estado deixado pelo anterior)
+- [ ] Casos de teste têm dados esperados explícitos, não "verificar se está correto"
+- [ ] Suíte de regressão definida e mantida
+- [ ] Estimativa de esforço de teste feita e comparada com o realizado ao final
+
+---
+
+## 3. Testes funcionais — comportamento
+
+### 3.1 CRUD e ciclo de vida do dado
+- [ ] Criar: registro é persistido com todos os campos corretos
+- [ ] Ler: listagem, busca, filtro, ordenação e detalhe retornam o dado certo
+- [ ] Atualizar: alteração parcial não zera campos não enviados
+- [ ] Excluir: exclusão lógica vs física está de acordo com a regra; dado excluído some de todas as views
+- [ ] Exclusão de registro com dependências: bloqueia, cascateia ou órfã? Comportamento é o especificado?
+- [ ] Duplicidade: sistema impede criação duplicada quando deve (chave única, constraint no banco, não só no front)
+- [ ] Reversão: é possível desfazer/restaurar quando a regra prevê
+- [ ] Contadores, totalizadores e agregados batem com o detalhe após cada operação
+
+### 3.2 Fluxos
+- [ ] Fluxo principal (caminho feliz) completo, ponta a ponta
+- [ ] Todos os fluxos alternativos documentados
+- [ ] Fluxos de exceção: o que acontece quando dá errado no meio
+- [ ] Abandono no meio do fluxo: sistema fica em estado consistente?
+- [ ] Retomada: usuário volta e continua de onde parou (ou recomeça de forma previsível)
+- [ ] Navegação para trás no navegador não corrompe o estado nem reenvia dado
+- [ ] Refresh (F5) no meio do fluxo não duplica nem perde dado
+- [ ] Deep link / URL direta para etapa interna: respeita pré-requisitos ou redireciona
+- [ ] Fluxo executado em múltiplas abas simultâneas
+- [ ] Timeout de sessão no meio do fluxo: mensagem clara e dado não perdido silenciosamente
+
+### 3.3 Regras de negócio e cálculos
+- [ ] Cada regra de negócio testada com valor abaixo, no limite e acima
+- [ ] Cálculos conferidos manualmente contra planilha/fonte independente
+- [ ] Arredondamento: regra definida (meio para cima, bancário) e aplicada de forma consistente em todo o sistema
+- [ ] Valores monetários não usam ponto flutuante para acumulação (centavos/inteiros ou decimal)
+- [ ] Somatórios de parcelas fecham com o total (diferença de centavo tratada)
+- [ ] Percentuais, descontos, impostos e acréscimos aplicados na ordem correta
+- [ ] Divisão por zero e conjunto vazio tratados
+- [ ] Números negativos onde não deveriam ser possíveis
+- [ ] Valores muito grandes (overflow) e casas decimais além do previsto
+- [ ] Regra que depende de data usa fuso e referência corretos (ver Seção 30)
+
+---
+
+## 4. Entradas, formulários e validação
+
+- [ ] Campo obrigatório: bloqueia envio vazio e com apenas espaços em branco
+- [ ] Tamanho mínimo e máximo validados (front **e** back)
+- [ ] Validação de tipo: número em campo numérico, data válida, e-mail com formato real
+- [ ] Toda validação de front tem contraparte no back (bypass via API testado)
+- [ ] Mensagem de erro aponta o campo, explica o problema e diz como corrigir
+- [ ] Erro não some antes do usuário conseguir ler
+- [ ] Foco vai para o primeiro campo com erro
+- [ ] Caracteres especiais, acentos, emoji e Unicode aceitos e persistidos corretamente
+- [ ] Apóstrofo em nome próprio (`O'Brien`, `D'Ávila`) não quebra nada
+- [ ] Espaços no início/fim são tratados (trim) de forma consistente
+- [ ] Colar (Ctrl+V) valores, inclusive com formatação e quebra de linha
+- [ ] Autocomplete/autofill do navegador não quebra a validação
+- [ ] Máscaras (CPF, CNPJ, telefone, CEP, moeda) não impedem envio nem corrompem o valor
+- [ ] Documentos validados por dígito verificador, não só por quantidade de dígitos
+- [ ] Campos numéricos: `0`, negativo, notação científica, separador de milhar
+- [ ] Campos de texto longo: limite de caracteres com contador e comportamento no limite
+- [ ] Upload: tipo, tamanho, quantidade, arquivo corrompido, extensão trocada, nome com caractere estranho
+- [ ] Duplo clique / múltiplos envios não criam registro duplicado (botão desabilita + proteção no back)
+- [ ] Enter no formulário faz o que se espera (submete ou não, de forma consistente)
+- [ ] Dado digitado não é perdido quando a validação falha
+- [ ] Campos dependentes (cascata: estado → cidade) limpam e recarregam corretamente
+
+---
+
+## 5. Dados, banco e integridade
+
+- [ ] Constraints de integridade existem **no banco**, não só na aplicação (FK, unique, not null, check)
+- [ ] Transações: operação multi-tabela é atômica (tudo ou nada)
+- [ ] Rollback testado com falha injetada no meio da operação
+- [ ] Concorrência: duas operações simultâneas no mesmo registro (last-write-wins? bloqueio otimista? versão?)
+- [ ] Condição de corrida em recurso escasso (estoque, vaga, cupom, slot de agenda)
+- [ ] Idempotência: reprocessar a mesma requisição não duplica efeito
+- [ ] Encoding do banco e das conexões em UTF-8, sem mojibake
+- [ ] Precisão de tipos: `numeric`/`decimal` para dinheiro, `timestamptz` para data-hora
+- [ ] Campos nulos vs string vazia vs zero têm semântica definida e consistente
+- [ ] Índices existem para os filtros e ordenações realmente usados
+- [ ] Consultas sem N+1 (verificado no log/APM, não no olho)
+- [ ] Volume: telas e relatórios com 10, 1.000, 100.000 e 1.000.000 de registros
+- [ ] Paginação correta em todas as pontas (offset/cursor, total, última página, página inexistente)
+- [ ] Migração de dados legados validada por amostragem **e** por contagem/somatório
+- [ ] Script de migração é reversível ou tem plano de reversão escrito
+- [ ] Backup existe, é automático, e a **restauração** foi testada de verdade
+- [ ] Retenção e expurgo de dados conforme política
+- [ ] Seed/dados de teste não vazam para produção
+
+---
+
+## 6. Multi-tenancy e isolamento (SaaS)
+
+- [ ] Usuário do tenant A não acessa dado do tenant B por ID direto (IDOR) em nenhum endpoint
+- [ ] Isolamento verificado em: API REST, RPC, GraphQL, Realtime/websocket, Storage e relatórios
+- [ ] Row Level Security (ou equivalente) ativa em **todas** as tabelas com dado de tenant
+- [ ] Policies testadas com token real de cada perfil, não só com service role
+- [ ] Busca global, exportação e agregados respeitam o escopo do tenant
+- [ ] Convite/remoção de usuário do tenant revoga acesso imediatamente (inclusive sessões ativas)
+- [ ] Troca de tenant na mesma sessão não carrega cache/estado do anterior
+- [ ] Configuração white-label (logo, cor, domínio, textos) não vaza entre tenants
+- [ ] Limites de plano por tenant aplicados no servidor (quantidade de usuários, registros, chamadas)
+- [ ] Deleção de tenant remove/anonimiza tudo, inclusive arquivos e backups conforme política
+
+---
+
+## 7. Autenticação, autorização e sessão
+
+- [ ] Cadastro, login, logout e recuperação de senha funcionam ponta a ponta
+- [ ] Login social/OAuth: fluxo completo, cancelamento no meio, conta já existente com mesmo e-mail
+- [ ] Senha: política aplicada, hash forte no banco, nunca em log, nunca retornada por API
+- [ ] Recuperação de senha: token de uso único, com expiração, invalidado após uso
+- [ ] Enumeração de usuário: mensagens não revelam se o e-mail existe
+- [ ] Bloqueio/throttle após tentativas repetidas de login
+- [ ] MFA (se aplicável): ativação, uso, códigos de recuperação, desativação
+- [ ] Sessão expira conforme política; refresh token rotaciona e é revogável
+- [ ] Logout invalida a sessão no servidor, não só no cliente
+- [ ] Trocar senha encerra as demais sessões
+- [ ] Matriz de permissões testada **perfil × ação × recurso**, item por item
+- [ ] Escalada horizontal: acessar recurso de outro usuário do mesmo nível
+- [ ] Escalada vertical: usuário comum chamando endpoint de admin
+- [ ] Ação bloqueada no front está bloqueada no back (botão escondido ≠ permissão negada)
+- [ ] Painel de admin exige autenticação forte e registra ações em auditoria
+- [ ] Rebaixamento de perfil revoga permissões imediatamente
+- [ ] Trilha de auditoria: quem fez, o quê, quando, de onde — para ações sensíveis
+
+---
+
+## 8. APIs e integrações
+
+- [ ] Contrato documentado (OpenAPI/schema) e a implementação bate com ele
+- [ ] Códigos HTTP corretos: 200/201/204, 400, 401, 403, 404, 409, 422, 429, 5xx
+- [ ] Corpo de erro padronizado, com código de erro estável para o cliente tratar
+- [ ] Mensagem de erro não expõe stack trace, query, caminho de arquivo ou versão
+- [ ] Payload inválido, campo faltando, campo extra, tipo errado, JSON malformado
+- [ ] Payload gigante e profundamente aninhado
+- [ ] Versionamento de API e retrocompatibilidade com clientes antigos (app mobile na loja!)
+- [ ] Timeout definido em toda chamada externa (nunca infinito)
+- [ ] Retry com backoff exponencial + jitter, apenas em erro transitório
+- [ ] Retry não duplica efeito colateral (chave de idempotência)
+- [ ] Circuit breaker / fallback quando o serviço externo cai
+- [ ] Comportamento com serviço externo lento (não só fora do ar)
+- [ ] Rate limiting aplicado e resposta 429 com `Retry-After`
+- [ ] Webhooks recebidos: assinatura validada, replay rejeitado, ordem fora de sequência tratada, entrega duplicada tratada
+- [ ] Webhooks enviados: reentrega em caso de falha, com log
+- [ ] Jobs assíncronos/filas: falha, reprocessamento, dead-letter queue monitorada
+- [ ] CORS configurado restritivamente (sem `*` em endpoint autenticado)
+- [ ] Paginação, filtros e ordenação da API testados com valores hostis
+
+---
+
+## 9. Pagamentos, assinaturas e cobrança
+
+- [ ] Fluxo de compra completo em ambiente sandbox de cada provedor
+- [ ] Cartão recusado, sem saldo, expirado, 3DS/desafio, timeout do gateway
+- [ ] Pagamento aprovado mas webhook atrasado: usuário não fica sem acesso indevidamente
+- [ ] Webhook duplicado não credita duas vezes
+- [ ] Valor cobrado = valor exibido, em todas as moedas e ciclos (mensal/anual)
+- [ ] Proporcional (pro-rata) em upgrade/downgrade calculado corretamente
+- [ ] Renovação automática, falha de renovação, período de carência (dunning) e cancelamento
+- [ ] Cancelamento mantém acesso até o fim do período pago (se essa é a regra)
+- [ ] Reembolso/estorno reflete no acesso e nos registros
+- [ ] Downgrade com uso acima do novo limite: comportamento definido
+- [ ] Impostos e nota fiscal conforme regra
+- [ ] Nenhum dado de cartão trafega ou é armazenado pela aplicação
+- [ ] Conciliação: o que o sistema registra bate com o extrato do provedor
+- [ ] Múltiplos provedores: comportamento consistente entre eles, sem estado divergente
+
+---
+
+## 10. Interface e experiência
+
+- [ ] Todos os estados de tela: carregando, vazio, com dados, erro, sem permissão, offline
+- [ ] Estado vazio orienta o próximo passo (não é só uma tela branca)
+- [ ] Feedback imediato em toda ação (loading em botão, skeleton, toast de sucesso)
+- [ ] Ação destrutiva pede confirmação e diz o que exatamente será perdido
+- [ ] Nada trava a UI enquanto processa em segundo plano
+- [ ] Textos sem erro de português, sem placeholder ("Lorem ipsum", "TODO", "teste123")
+- [ ] Terminologia consistente (o mesmo conceito com o mesmo nome em todas as telas)
+- [ ] Layout não quebra com texto longo, nome grande, número grande, lista longa
+- [ ] Zoom do navegador em 200% não quebra a tela
+- [ ] Impressão / exportação para PDF sai legível quando é um caso de uso real
+- [ ] Scroll infinito ou paginação preserva posição ao voltar
+- [ ] Ordenação e filtros persistem conforme esperado ao navegar e voltar
+- [ ] Tema claro/escuro (se houver) sem texto invisível
+- [ ] Modais: fecham com ESC e clique fora, prendem o foco, empilhamento correto
+- [ ] Formulário longo avisa antes de sair com alterações não salvas
+- [ ] Consistência com o design system (espaçamento, tipografia, cor, componente)
+
+---
+
+## 11. Responsividade e compatibilidade
+
+- [ ] Breakpoints principais: 320px, 375px, 768px, 1024px, 1440px, 1920px
+- [ ] Orientação retrato e paisagem
+- [ ] Navegadores alvo: Chrome, Safari, Firefox, Edge — versão atual e anterior
+- [ ] Safari/iOS testado de verdade (não só Chrome redimensionado)
+- [ ] Android e iOS nas versões mínimas suportadas
+- [ ] Área segura (notch, barra inferior, teclado aberto cobrindo o campo)
+- [ ] Toque: alvos com no mínimo ~44px, sem dependência de *hover*
+- [ ] Resolução alta/baixa, densidade de pixel, imagens nítidas
+- [ ] Sistema operacional com fonte aumentada nas configurações de acessibilidade
+- [ ] Comportamento com JavaScript lento, bloqueador de anúncio e cookies de terceiros bloqueados
+
+---
+
+## 12. Acessibilidade (WCAG 2.2 nível AA)
+
+- [ ] Navegação completa apenas por teclado, na ordem lógica
+- [ ] Foco sempre visível e nunca preso (exceto modal, que solta com ESC)
+- [ ] Link "pular para o conteúdo"
+- [ ] Todo campo tem `label` associado (placeholder não é label)
+- [ ] Erros de formulário anunciados a leitores de tela (`aria-live`, `aria-describedby`)
+- [ ] Imagens com `alt` significativo; decorativas com `alt=""`
+- [ ] Contraste de texto ≥ 4.5:1 (≥ 3:1 para texto grande e elementos de interface)
+- [ ] Informação nunca transmitida só por cor
+- [ ] Hierarquia de cabeçalhos correta (h1 → h2 → h3, sem pular nível)
+- [ ] HTML semântico e landmarks (`nav`, `main`, `header`, `footer`)
+- [ ] Componentes customizados com papel/estado ARIA corretos
+- [ ] Vídeo com legenda; áudio com transcrição
+- [ ] Nada pisca mais de 3 vezes por segundo
+- [ ] `prefers-reduced-motion` respeitado
+- [ ] Testado com leitor de tela real (NVDA, VoiceOver ou TalkBack)
+- [ ] Verificação automatizada (axe/Lighthouse) sem violações críticas — sabendo que ela pega só ~30%
+
+---
+
+## 13. Internacionalização e localização
+
+- [ ] Nenhum texto fixo no código (tudo em arquivo de tradução)
+- [ ] Formato de data, hora, número e moeda conforme localidade
+- [ ] Fuso horário: exibição no fuso do usuário, armazenamento em UTC
+- [ ] Horário de verão e mudanças de fuso históricas
+- [ ] Pluralização correta (0, 1, 2, muitos)
+- [ ] Texto traduzido mais longo não quebra o layout
+- [ ] Ordenação alfabética com acentuação correta
+- [ ] Idioma com escrita da direita para a esquerda (se aplicável)
+
+---
+
+## 14. Mobile (app nativo / React Native)
+
+- [ ] Ciclo de vida: app em segundo plano, retomado, encerrado pelo sistema, retomado após dias
+- [ ] Rotação de tela sem perda de estado
+- [ ] Comportamento offline e sincronização ao voltar a conexão
+- [ ] Rede instável, 3G lento, alternância Wi-Fi ↔ dados móveis no meio de uma requisição
+- [ ] Permissões: concedidas, negadas, negadas permanentemente, revogadas nas configurações
+- [ ] Notificações push: com app aberto, fechado, em segundo plano; deep link a partir da notificação
+- [ ] Deep link e universal link, inclusive com app não instalado
+- [ ] Teclado não cobre o campo em foco; tipo de teclado correto por campo
+- [ ] Gestos do sistema (voltar no Android, swipe no iOS) não corrompem estado
+- [ ] Consumo de bateria, memória e dados aceitável
+- [ ] Tamanho do bundle e tempo de inicialização (cold start)
+- [ ] Atualização OTA e atualização pela loja; versão antiga do app contra API nova
+- [ ] Requisitos das lojas (App Store / Play): privacidade, política, classificação etária
+- [ ] Comportamento com armazenamento cheio e com modo de economia de bateria
+
+---
+
+## 15. Performance e escalabilidade
+
+- [ ] Tempo de resposta definido como requisito (p50, p95, p99 — média engana)
+- [ ] Teste de carga com volume esperado de pico
+- [ ] Teste de estresse até encontrar o ponto de ruptura (e ver **como** rompe)
+- [ ] Teste de resistência (soak) por horas: vazamento de memória, conexões, handles
+- [ ] Teste de pico (spike): 10× em segundos
+- [ ] Teste de volume: banco grande, arquivo grande, lista grande
+- [ ] Concorrência: N usuários simultâneos no mesmo recurso
+- [ ] Core Web Vitals: LCP, INP, CLS dentro do alvo
+- [ ] Peso da página, imagens otimizadas, lazy loading, code splitting
+- [ ] Cache: existe, invalida corretamente, não serve dado de outro usuário/tenant
+- [ ] Pool de conexões dimensionado; sem esgotamento sob carga
+- [ ] Consultas lentas identificadas (plano de execução, não intuição)
+- [ ] Autoescala testada (subir e **descer**)
+- [ ] Custo por requisição/usuário conhecido — performance ruim aparece na fatura antes de aparecer na tela
+- [ ] Degradação graciosa quando o sistema satura (fila, 429, mensagem) em vez de erro genérico
+
+---
+
+## 16. Resiliência, disponibilidade e recuperação
+
+- [ ] Queda de dependência externa: sistema degrada, não morre
+- [ ] Queda do banco: mensagem adequada e recuperação automática ao voltar
+- [ ] Reinício da aplicação sem perda de requisição em andamento (graceful shutdown)
+- [ ] Health check reflete a saúde real (não retorna 200 com o banco fora)
+- [ ] Failover e redundância testados
+- [ ] RTO e RPO definidos, e o teste de restauração cumpre ambos
+- [ ] Plano de recuperação de desastre documentado e ensaiado
+- [ ] Fila crescendo: alerta antes de estourar
+- [ ] Falha parcial: metade dos serviços fora, comportamento previsível
+
+---
+
+## 17. Segurança (gate de QA)
+
+> Você já mantém uma auditoria de segurança dedicada e muito mais profunda. Esta seção é o **portão mínimo de QA** — se qualquer item falhar aqui, o build não passa e vai para a auditoria completa.
+
+- [ ] OWASP Top 10 verificado nos pontos alterados pelo release
+- [ ] Injeção: SQL, NoSQL, comando, template, LDAP — em todos os campos e parâmetros
+- [ ] XSS refletido, armazenado e via DOM; conteúdo do usuário renderizado sem escape
+- [ ] Arquivo enviado pelo usuário não é servido como HTML/executável no mesmo domínio
+- [ ] SSRF em qualquer campo que aceite URL (incluindo redirect e IPv6)
+- [ ] CSRF conforme o mecanismo de sessão (cookie vs Bearer)
+- [ ] Controle de acesso quebrado (IDOR/BOLA) — o item nº 1 da lista, e o mais comum
+- [ ] Segredos: nada de chave, token ou senha em repositório, log, bundle do front ou mensagem de erro
+- [ ] Chave de serviço (`service_role`, admin) nunca no cliente
+- [ ] HTTPS obrigatório; HSTS; cookies `Secure`, `HttpOnly`, `SameSite`
+- [ ] Cabeçalhos de segurança: CSP, X-Content-Type-Options, Referrer-Policy, X-Frame-Options
+- [ ] Dependências sem vulnerabilidade conhecida crítica/alta (SCA no CI) e sem pacote abandonado
+- [ ] SAST/secret scanning rodando no pipeline e sem achado alto pendente
+- [ ] Dados sensíveis criptografados em repouso e em trânsito
+- [ ] Rate limit e proteção contra abuso em endpoints caros e de autenticação
+- [ ] Logs não registram senha, token, CPF completo, cartão ou conteúdo sensível
+
+---
+
+## 18. Privacidade e conformidade (LGPD)
+
+- [ ] Base legal definida para cada tratamento de dado pessoal
+- [ ] Coleta mínima necessária (nada de "guarda que um dia serve")
+- [ ] Consentimento coletado de forma granular, registrado com data/hora/versão do texto
+- [ ] Política de privacidade e termos acessíveis, versionados e vigentes
+- [ ] Direitos do titular operacionalizados: acesso, correção, portabilidade, exclusão, revogação
+- [ ] Exclusão a pedido remove/anonimiza em **todos** os lugares (banco, arquivos, cache, logs, backups conforme política, terceiros)
+- [ ] Prazo de retenção definido por categoria de dado e expurgo automatizado
+- [ ] Menores de idade: consentimento parental, dado mínimo, sem perfilhamento indevido, linguagem adequada
+- [ ] Dados sensíveis identificados e com proteção reforçada
+- [ ] Anonimização/pseudonimização real (testar risco de reidentificação por cruzamento)
+- [ ] Subprocessadores mapeados; transferência internacional com salvaguarda
+- [ ] Metadados de arquivo (EXIF, autor de documento) tratados no upload
+- [ ] Plano de resposta a incidente de vazamento, com prazo de comunicação
+- [ ] Decisão automatizada com impacto no titular: revisão prevista (art. 20)
+
+---
+
+## 19. Observabilidade e operação
+
+- [ ] Log estruturado, com nível adequado e ID de correlação por requisição
+- [ ] Erro no cliente e no servidor chega a uma ferramenta de monitoramento (não fica só no console)
+- [ ] Métricas de negócio e técnicas expostas em painel
+- [ ] Alertas configurados com dono e limiar razoável (alerta que sempre dispara é alerta ignorado)
+- [ ] Tracing distribuído permite seguir uma requisição entre serviços
+- [ ] É possível responder "o que aconteceu com o usuário X às 14h32" sem acessar o banco na mão
+- [ ] Auditoria de ações sensíveis, imutável
+- [ ] Runbook para os incidentes mais prováveis
+- [ ] Retenção de log definida e compatível com a política de privacidade
+
+---
+
+## 20. Deploy, configuração e reversão
+
+- [ ] Deploy automatizado e reproduzível
+- [ ] Variáveis de ambiente documentadas; sistema falha rápido e claro se faltar alguma
+- [ ] Configuração separada do código; nada de valor de produção fixo no código
+- [ ] Migração de banco compatível com a versão anterior (deploy sem downtime)
+- [ ] Rollback testado — não apenas "existe", mas **executado** em ensaio
+- [ ] Feature flag permite desligar a novidade sem novo deploy
+- [ ] Smoke test automático pós-deploy em produção
+- [ ] Estratégia de release (canário/blue-green) validada
+- [ ] Ambientes equivalentes (dev/homolog/prod) nas diferenças que importam
+- [ ] Versão exibida/consultável para saber exatamente o que está no ar
+
+---
+
+## 21. Qualidade de código e manutenibilidade
+
+- [ ] Testes automatizados cobrem os caminhos críticos (cobertura como sinal, nunca como meta)
+- [ ] Lint e formatação no CI, sem erro suprimido sem justificativa
+- [ ] Tipagem estática sem `any` disfarçando erro
+- [ ] Sem código morto, comentado ou `console.log` esquecido
+- [ ] Tratamento de erro real, sem `catch` vazio engolindo exceção
+- [ ] Complexidade e duplicação sob controle
+- [ ] Dependências atualizadas e com licença compatível; SBOM disponível
+- [ ] Revisão de código humana obrigatória em branch protegida
+- [ ] README permite subir o projeto do zero
+- [ ] Dívida técnica registrada em backlog, não na memória de alguém
+
+---
+
+## 22. Automação e regressão
+
+- [ ] Suíte de regressão roda no CI a cada PR e antes de cada release
+- [ ] Testes instáveis (*flaky*) são medidos, isolados e corrigidos — não re-rodados até passar
+- [ ] Testes independentes de dados residuais; cada um cria e limpa o que usa
+- [ ] Seletores estáveis (`data-testid`), não texto ou XPath frágil
+- [ ] Sem `sleep` fixo; espera por condição
+- [ ] Tempo de execução da suíte compatível com a frequência de deploy
+- [ ] Falha de teste gera evidência útil (print, log, vídeo, trace)
+- [ ] Bug corrigido vira teste automatizado que o pega se voltar
+- [ ] Pipeline bloqueia merge quando o gate falha (gate que dá para ignorar não é gate)
+
+---
+
+## 23. Testes exploratórios
+
+- [ ] Sessões exploratórias com *charter* definido e tempo delimitado (60–90 min)
+- [ ] Sessão realizada por alguém que não escreveu o código
+- [ ] Persona de usuário real: apressado, desatento, malicioso, com pouca familiaridade
+- [ ] Teste "macaco": clicar em tudo, fora de ordem, rápido demais
+- [ ] Uso do sistema em condições ruins: rede lenta, aba em segundo plano, bateria baixa
+- [ ] Achados registrados mesmo quando não são "bug do escopo"
+- [ ] Bug bash com pessoas de outras áreas antes de releases grandes
+
+---
+
+## 24. Funcionalidades de IA / LLM (quando aplicável)
+
+- [ ] Prompt injection direto e indireto (via conteúdo enviado pelo usuário, arquivo, página, dado do banco)
+- [ ] Permissão revalidada **no momento da execução da ferramenta**, não só na entrada do chat
+- [ ] O modelo não consegue acessar dado de outro usuário/tenant por meio de contexto ou ferramenta
+- [ ] Saída do modelo tratada como não confiável (nunca renderizada como HTML, nunca executada, nunca concatenada em SQL)
+- [ ] Guardrails de conteúdo testados, com atenção redobrada quando há público menor de idade
+- [ ] Alucinação: comportamento quando o modelo não sabe (admite? inventa? cita fonte falsa?)
+- [ ] Conjunto de avaliação (evals) com casos de referência e resultado esperado, versionado
+- [ ] Regressão de qualidade ao trocar de modelo/versão/prompt é detectável
+- [ ] Não determinismo: fluxo funciona com respostas diferentes para a mesma entrada
+- [ ] Falha da API do provedor: timeout, 429, indisponibilidade → fallback e mensagem clara
+- [ ] Limite de custo e de tokens por usuário/tenant, com teto de gasto
+- [ ] Latência aceitável; streaming com cancelamento funcionando
+- [ ] Dado pessoal enviado ao provedor está previsto na base legal e na política de privacidade
+- [ ] Não divulgação de provedor, modelo, prompt de sistema e stack quando esse é o requisito
+- [ ] Entrada e saída registradas com o cuidado de privacidade adequado
+
+---
+
+## 25. Documentação e suporte
+
+- [ ] Documentação do usuário atualizada com o que mudou
+- [ ] Notas de release escritas em linguagem de usuário
+- [ ] Documentação técnica/API publicada e coerente com a implementação
+- [ ] Time de suporte avisado e treinado no que muda
+- [ ] FAQ e mensagens de erro alinhadas com o que o suporte vai responder
+- [ ] Contato/canal de suporte visível no produto
+
+---
+
+## 26. Homologação (UAT)
+
+- [ ] Executada por usuário real ou representante do negócio, não pelo time técnico
+- [ ] Roteiro baseado em cenários de negócio, não em telas
+- [ ] Executada em ambiente equivalente ao de produção, com dado realista
+- [ ] Aceite formal registrado, com nome e data
+- [ ] Divergências classificadas como defeito ou mudança de escopo (e não misturadas)
+
+---
+
+## 27. Critérios de saída (Exit Criteria)
+
+- [ ] 100% dos casos de teste planejados executados (ou desvio justificado por escrito)
+- [ ] Zero defeito bloqueador ou crítico em aberto
+- [ ] Defeitos altos: corrigidos ou com aceite formal e contorno documentado
+- [ ] Regressão completa executada no build final — o mesmo que vai subir
+- [ ] Requisitos rastreados: nenhum requisito sem teste executado
+- [ ] Testes de performance e segurança do escopo concluídos
+- [ ] Plano de rollback pronto e ensaiado
+- [ ] Monitoramento e alertas ativos para o que foi lançado
+- [ ] Relatório de teste emitido: o que foi testado, o que não foi, riscos residuais assumidos e por quem
+
+---
+
+## 28. Pós-release
+
+- [ ] Smoke test em produção logo após o deploy
+- [ ] Acompanhamento de erro, latência e métricas de negócio nas primeiras horas
+- [ ] Comparação com a linha de base anterior ao release
+- [ ] Canal de feedback do usuário monitorado
+- [ ] Defeitos escapados (*escaped defects*) registrados e analisados: por que passaram?
+- [ ] Retrospectiva de qualidade com ação concreta, não só lamento
+- [ ] Métricas acompanhadas: defeitos escapados, taxa de reabertura, tempo de correção, cobertura de regressão, DORA (frequência de deploy, lead time, taxa de falha, tempo de recuperação)
+
+---
+
+## 29. Gestão de defeitos
+
+- [ ] Todo defeito tem: passos para reproduzir, esperado, obtido, ambiente, build, evidência
+- [ ] Severidade (impacto técnico) separada de prioridade (urgência de negócio)
+- [ ] Duplicados identificados antes de abrir
+- [ ] Defeito fechado só após reteste **e** regressão da área afetada
+- [ ] Defeito reaberto sinaliza correção incompleta — vira análise de causa raiz
+- [ ] "Não reproduz" nunca fecha sem investigação de contexto (dado, perfil, ambiente, timing)
+- [ ] Causa raiz analisada para crítico e bloqueador, com ação preventiva
+- [ ] Tendência de defeitos por módulo acompanhada (concentração indica onde investir)
+
+---
+
+## 30. As armadilhas que só aparecem depois de muito tempo de estrada
+
+> Nenhuma dessas está no requisito. Todas já derrubaram sistema em produção.
+
+- [ ] **Fuso e horário de verão** — evento agendado às 00:30 no dia da virada; usuário em outro fuso; servidor em UTC e front em local
+- [ ] **Virada de dia/mês/ano** — relatório às 23:59:59; "hoje" calculado no cliente vs no servidor
+- [ ] **Ano bissexto e 29 de fevereiro** — assinatura anual criada em 29/02
+- [ ] **Fim de semana e feriado** — regra de prazo em dia útil; feriado municipal
+- [ ] **O segundo usuário** — tudo funciona com um; quebra quando dois fazem ao mesmo tempo
+- [ ] **O último item** — remover o único registro, o único admin, o último membro do tenant
+- [ ] **Zero, um e muitos** — lista vazia, com um item, com dez mil
+- [ ] **Nome que quebra tudo** — `O'Brien`, `José da Silva Júnior Neto de Albuquerque e Castro`, emoji, nome de uma letra
+- [ ] **Duplo clique** — em salvar, em pagar, em enviar
+- [ ] **Botão voltar do navegador** — depois de pagar, depois de enviar, depois de sair
+- [ ] **A aba esquecida aberta desde ontem** — token expirado, dado velho, versão antiga do front
+- [ ] **O usuário que fecha o notebook no meio** — sessão suspensa e retomada
+- [ ] **Cache que não invalida** — usuário troca o dado e continua vendo o antigo (ou vê o do vizinho)
+- [ ] **A conta que foi excluída** — mas ainda aparece em relatório, em menção, em log, em token válido
+- [ ] **O arquivo de 300 MB** — e o de 0 byte, e o com extensão trocada
+- [ ] **Colar com formatação** — do Word, do Excel, com quebra de linha, com caractere invisível
+- [ ] **O relatório que ninguém abre há meses** — até o dia do fechamento
+- [ ] **A integração que sempre funcionou** — até o parceiro mudar o contrato sem avisar
+- [ ] **O e-mail que vai para spam** — verificação, recuperação de senha, nota fiscal
+- [ ] **Ordenação instável** — mesma consulta, ordens diferentes, paginação repetindo/pulando item
+- [ ] **`null` vs `""` vs `0` vs `false`** — e o `if` que trata os quatro como a mesma coisa
+- [ ] **Fuso do banco ≠ fuso da aplicação ≠ fuso do usuário**
+- [ ] **A migração que rodou parcialmente** — metade dos dados no formato novo
+- [ ] **O ambiente de teste apontando para produção** — em uma variável esquecida
+- [ ] **O dado de teste que foi para produção** — "Teste 123", `teste@teste.com`, valor R$ 0,01
+
+---
+
+### Registro de aplicação
+
+| Sistema / Release | Data | Responsável QA | Seções aplicadas | Seções N/A (motivo) | Veredito |
+|---|---|---|---|---|---|
+| | | | | | |
+
+---
+
+## ⚙️ SKILLS SATÉLITES
+
+Catálogo: `skills/dev/skills-satelites.md`. Você julga; o `/tester` opera Playwright. Puxe satélite para **estratégia e bug report**, não para escrever teste.
+
+| Quando | Carregar |
+|---|---|
+| Estratégia / qualidade | `testing-strategy`, `quality-playbook` |
+| Bug report padrão-ouro | `bug-reproduction-brief`, `bug-receipt` |
+| Validar dados / análise | `validate-data` |
 
 ---
 

@@ -771,6 +771,18 @@ Uma feature de IA só está PRONTA quando tudo abaixo é verdadeiro:
 
 ---
 
+## ⚙️ SKILLS SATÉLITES
+
+Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKILL.md` antes de mexer em prompt, eval ou pgvector.
+
+| Quando | Carregar |
+|---|---|
+| Prompt / eval | `finalize-agent-prompt`, `prompt-optimizer`, `eval-driven-dev`, `agentic-eval` |
+| Segurança de prompt / agente | `ai-prompt-engineering-safety-review`, `agent-governance`, `agent-owasp-compliance` |
+| RAG / pgvector / embeddings no Postgres | `supabase-postgres-best-practices` + `supabase` |
+
+---
+
 ## 🤝 PASSAGEM DE BASTÃO — INTEGRAÇÃO COM A EQUIPE
 
 ### O que eu recebo (e de quem)

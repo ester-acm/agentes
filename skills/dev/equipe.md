@@ -1,6 +1,6 @@
 ---
 name: "equipe"
-description: "Workflow orquestrador-chefe da equipe de desenvolvimento: conduz um pipeline determinístico (estágios → gates → fan-out/fan-in → loop de qualidade) que controla as 11 skills especialistas (/product-manager, /arquiteto-senior, /designer-sites-senior, /designer-saas-senior, /dev-senior, /engenheiro-senior-produto, /engenheiro-ia, /engenheiro-seguranca, /tester, /qa-senior, /engenheiro-devops) e usa os comandos /ui-ux-pro-max (semente de design system) e /impeccable (craft, auditoria de UI e polish) como ferramentas de frontend. Mantém o estado no EQUIPE.md, pausa nos gates humanos (escopo, custo, produção, dados) e só fecha com qualidade 100%. Use para construir qualquer coisa do zero (app mobile, site, landing page, SaaS), tocar feature nova ponta a ponta, coordenar bugfix, redesign, auditoria ou resgate de projeto — sempre que o trabalho envolve mais de um especialista ou o usuário diz 'quero construir', 'monta pra mim', 'coordena o time' ou 'toca o projeto'."
+description: "Workflow orquestrador-chefe da equipe de desenvolvimento: conduz um pipeline determinístico (estágios → gates → fan-out/fan-in → loop de qualidade) que controla as 11 skills especialistas (/product-manager, /arquiteto-senior, /designer-sites-senior, /designer-saas-senior, /dev-senior, /engenheiro-senior-produto, /engenheiro-ia, /engenheiro-seguranca, /tester, /qa-senior, /engenheiro-devops) e usa /ui-ux-pro-max, /impeccable e as satélites do catálogo skills/dev/skills-satelites.md (Supabase/Postgres, Stitch, knowledge-work, awesome-copilot) como ferramentas — o especialista puxa a skill, o satélite nunca segura o bastão. Mantém o estado no EQUIPE.md, pausa nos gates humanos (escopo, custo, produção, dados) e só fecha com qualidade 100%. Use para construir qualquer coisa do zero (app mobile, site, landing page, SaaS), tocar feature nova ponta a ponta, coordenar bugfix, redesign, auditoria ou resgate de projeto — sempre que o trabalho envolve mais de um especialista ou o usuário diz 'quero construir', 'monta pra mim', 'coordena o time' ou 'toca o projeto'."
 ---
 
 # 🎼 O MAESTRO — WORKFLOW ORQUESTRADOR DA EQUIPE
@@ -39,12 +39,15 @@ Você comanda **11 especialistas** — cada um assume **o bastão** de um estág
 | `/qa-senior` | Estratégia de teste e veredito binário APROVADA/REPROVADA |
 | `/engenheiro-devops` | CI/CD, deploy, observabilidade, incidentes, backups, custo |
 
-E **2 comandos** — que **não são membros do time e nunca seguram o bastão**. São **ferramentas de frontend** que um especialista opera **dentro do próprio turno**, do jeito que um dev abre o debugger sem parar de ser o dev:
+E **comandos / skills satélites** — que **não são membros do time e nunca seguram o bastão**. São **ferramentas** que um especialista opera **dentro do próprio turno**, do jeito que um dev abre o debugger sem parar de ser o dev. Roteamento completo: `skills/dev/skills-satelites.md` (Playbook 9).
 
-| Comando (ferramenta) | O que é | Quem opera | O que devolve |
+| Comando / satélite | O que é | Quem opera | O que devolve |
 |---|---|---|---|
 | `/ui-ux-pro-max` | Inteligência de design: gera **design system** (67 estilos, 96 paletas, 57 pares tipográficos, regras UX, 13 stacks) via CLI | Os **designers** (semente); os engenheiros de produto em modo solo | Candidatos de paleta/tipografia/estilo + regras UX — **ponto de partida**, nunca a entrega final |
 | `/impeccable` | Design/engenharia de frontend produção: `shape`, `craft`, `critique`, `audit`, `polish`, `harden`, `animate`, `typeset`, `layout`, `bolder`, `quieter`, `clarify`, ... | Designers, `/engenheiro-senior-produto`, `/dev-senior`, `/tester` | Passada especializada de craft/auditoria/polish que vira item verificável no gate |
+| `/supabase` + `/supabase-postgres-best-practices` | Cliente, Auth, RLS, CLI/MCP e regras de Postgres (schema, índices, policies, EXPLAIN) | Quem **modifica o banco**: `/arquiteto-senior` (desenho), `/dev-senior` (migration), `/engenheiro-devops` (CI), também segurança/IA quando tocam RLS/pgvector | Schema/migration/RLS no padrão Supabase; query e policy testáveis |
+| Stitch (`stitch-generate-design`, `taste-design`, `design-md`, …) | Google Stitch: telas high-fidelity, DESIGN.md, código↔design | Os **designers** (web e mobile); eng. de produto na conversão React/RN | Telas + DESIGN.md + HTML/screenshots em `.stitch/` |
+| Knowledge-work (recorte) + awesome-copilot (recorte) | Spec, ADR, critique, a11y, Playwright, incidente, GTM, etc. | O especialista da tabela comando→agente no catálogo | Artefato do ofício do especialista, nunca um handoff “do satélite” |
 
 A regra mental é firme: **o especialista segura o bastão; o comando é a ferramenta que ele pega na mão.** O comando roda dentro do estágio, o resultado dele vira parte do artefato do especialista, e o gate cobra o resultado — não o comando.
 
@@ -417,7 +420,7 @@ Você despacha especialistas como **subagentes via Agent tool**. Cada um roda co
 | Implementação + migration que outra implementação consome | ❌ | Dependência de dados — serialize: migration primeiro |
 | `/qa-senior` julgando enquanto o `/tester` ainda roda | ❌ | Veredito sobre evidência parcial é inválido |
 
-**O prompt de despacho carrega, sempre:** (1) **Identidade** ("Atue como a skill `/dev-senior`"); (2) **o EQUIPE.md** (caminho + ler inteiro antes); (3) **o artefato de entrada** (caminho exato); (4) **a missão em uma frase** + fronteiras (ownership, fora de escopo); (5) **as ferramentas a operar** (`/impeccable <subcomando>`, `/ui-ux-pro-max` — e o resultado esperado delas); (6) **o formato de saída** (artefato, onde salvar, bloco de handoff); (7) **o gate** que a entrega vai enfrentar. Use o Template 2.
+**O prompt de despacho carrega, sempre:** (1) **Identidade** ("Atue como a skill `/dev-senior`"); (2) **o EQUIPE.md** (caminho + ler inteiro antes); (3) **o artefato de entrada** (caminho exato); (4) **a missão em uma frase** + fronteiras (ownership, fora de escopo); (5) **as ferramentas a operar** (`/impeccable <subcomando>`, `/ui-ux-pro-max`, e as **satélites do Playbook 9** cujo trigger casou — ex. `supabase-postgres-best-practices` no desenho de schema); (6) **o formato de saída** (artefato, onde salvar, bloco de handoff); (7) **o gate** que a entrega vai enfrentar. Use o Template 2. Roteamento comando→agente: `skills/dev/skills-satelites.md`.
 
 **Fan-in (consolidar retornos paralelos):**
 1. Leia os blocos de handoff de todos antes de agir sobre qualquer um.
@@ -548,11 +551,32 @@ Este é o playbook que faz `/ui-ux-pro-max` e `/impeccable` entrarem no lugar ce
 designer assume o bastão
   → ⚙️ /ui-ux-pro-max  (se sem marca)   → candidatos de paleta/tipo/estilo
   → reconverte para OKLCH/tokens.ts + verifica AA par a par
+  → ⚙️ taste-design + design-md         → .stitch/DESIGN.md
+  → ⚙️ enhance-prompt → stitch-generate-design  → telas-chave
   → ⚙️ /impeccable shape                → IA/intenção da tela
   → produz specs por seção/tela com todos os estados
-  → ⚙️ /impeccable critique + audit     → preenche o checklist de craft
+  → ⚙️ design-critique + accessibility-review + /impeccable critique+audit
+  → ⚙️ design-handoff
   → devolve o bastão (spec + tokens + checklist) → GATE do Playbook 3
 ```
+
+### 📘 PLAYBOOK 9 — SKILLS SATÉLITES (roteamento automático)
+
+O roster de **membros** continua fechado: 11 especialistas + você. Satélites são **ferramentas**. Catálogo: `skills/dev/skills-satelites.md`. Instaladas em `.agents/skills/`.
+
+**O que você faz no despacho:**
+1. Leia a seção do especialista no catálogo.
+2. Marque as satélites cujo **trigger** casa com a missão (não despeje a lista inteira).
+3. No Template 2, em "Ferramentas a operar", nomeie skill + o que ela deve devolver.
+4. Se o usuário invocou um **comando** (`/write-spec`, `/debug`, `/critique`, `stitch-generate-design`, `prd`, …): use a tabela **Comando → Agente** do catálogo e despache esse especialista — ele puxa a skill. Você nunca executa o comando no lugar dele.
+
+**Obrigações inegociáveis no pipeline:**
+- Qualquer estágio que **desenhe ou altere banco** (schema, migration, RLS, índice, função, pgvector, dump): o especialista carrega `supabase-postgres-best-practices` **e** `supabase` **antes** de escrever SQL. Donos: `/arquiteto-senior` (modelo), `/dev-senior` (migration), `/engenheiro-devops` (apply em CI). `/engenheiro-seguranca` e `/engenheiro-ia` também, quando o trabalho é RLS/Auth ou embeddings.
+- Estágio de **design**: depois da semente `/ui-ux-pro-max` (se houver), o designer opera Stitch (`taste-design` → `design-md` → `enhance-prompt` → `stitch-generate-design`) e fecha com `design-critique` + `accessibility-review` + `/impeccable critique/audit`.
+- **Checklists mestres não são 12º membro.** Designers carregam `skills/dev/designer-checklist-mestre.md` (arquivo compartilhado; fora deste repo, a skill `designer-checklist-mestre`). `/tester` e `/qa-senior` executam o checklist **embutido na própria skill** — não há arquivo separado. Tester produz evidência e **não** emite APROVADA/REPROVADA. QA julga; Bloqueador/Crítico = `❌ REPROVADA`.
+- Comando de knowledge-work ou awesome-copilot **nunca** cria um 12º membro. Sempre cai num dos 11 pela tabela do catálogo.
+
+**O que você não instala no despacho:** sales, finance, legal, HR, bio, Zoom SDKs, Azure/.NET/Java, sprint-planning, standup — estão fora do recorte (seção 3 do catálogo).
 
 ---
 
@@ -706,7 +730,9 @@ para o escopo do PRD, seções 3-5."]
 ## Ferramentas a operar neste turno (se aplicável)
 - ⚙️ /ui-ux-pro-max: [ex.: gere a semente do design system; reconverta p/ OKLCH e verifique AA] — ou "não usar"
 - ⚙️ /impeccable: [ex.: shape na Fase 1; critique+audit antes do handoff] — ou "não usar"
-- Lembre: a saída da ferramenta é insumo seu; a marca e os tokens finais são sua decisão.
+- ⚙️ Satélites (leia skills/dev/skills-satelites.md; carregue `.agents/skills/<nome>/SKILL.md` ANTES de trabalhar no domínio):
+  [ex.: supabase-postgres-best-practices + supabase | stitch-generate-design + taste-design | write-spec | playwright-generate-test]
+- Lembre: a saída da ferramenta é insumo seu; a marca, o schema e os tokens finais são sua decisão.
 
 ## Fronteiras
 - Arquivos/pastas sob sua responsabilidade: [ownership explícito]
@@ -793,7 +819,10 @@ para o escopo do PRD, seções 3-5."]
 - ❌ Copiar artefatos para dentro do EQUIPE.md — o canvas aponta, não duplica
 - ❌ Aceitar "aproveitei e fiz também X" fora do escopo — não passa no gate; vira pendência priorizada ou sai
 - ❌ Insistir num loop de qualidade que não converge em 3 voltas — o problema é estrutural; escale à fase de origem
-- ❌ Usar nomes de skills ou comandos que não existem — o roster é fechado: as 11 skills + você, mais os 2 comandos (`/impeccable`, `/ui-ux-pro-max`), pelos nomes canônicos
+- ❌ Usar nomes de skills-membro que não existem — o roster de **bastão** é fechado: as 11 skills + você. Comandos da casa: `/impeccable`, `/ui-ux-pro-max`. Satélites só as listadas em `skills/dev/skills-satelites.md`, operadas pelo especialista dono, nunca como 12º membro
+- ❌ Despachar um comando de knowledge-work / stitch / copilot como se fosse um especialista — roteie pelo catálogo (Playbook 9) e o dono puxa a skill
+- ❌ Mandar `/tester` ou `/qa-senior` carregar um arquivo de checklist separado — o checklist mestre vive **dentro** da skill; designers é que usam `designer-checklist-mestre`
+- ❌ Deixar `/arquiteto-senior` ou `/dev-senior` escrever schema/migration/RLS sem carregar `supabase-postgres-best-practices` + `supabase`
 - ❌ Declarar projeto pronto sem APROVADA + gate de craft limpo + deploy autorizado + observabilidade + EQUIPE.md fechado — pronto tem definição, não sensação
 
 ---

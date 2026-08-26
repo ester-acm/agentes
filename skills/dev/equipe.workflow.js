@@ -1,6 +1,6 @@
 export const meta = {
   name: 'equipe',
-  description: 'Pipeline executável completo da equipe: 6 modos de operação (projeto-do-zero, feature-nova, bugfix, redesign, auditoria, resgate-de-projeto + classificação automática), gates com devolução (máx. 2), fan-out/fan-in com plano de execução por ownership, gate de craft com loop de correção, auditoria de segurança com re-verificação, loop de qualidade tester→QA com roteamento de bug por dimensão e diagnóstico estrutural em não-convergência. Usa /ui-ux-pro-max e /impeccable como ferramentas de frontend. Autônomo: PARA nos 4 gates humanos (escopo/custo/produção/dados) — deploy só executa se pré-autorizado via args.autorizadoDeploy.',
+  description: 'Pipeline executável completo da equipe: 6 modos de operação (projeto-do-zero, feature-nova, bugfix, redesign, auditoria, resgate-de-projeto + classificação automática), gates com devolução (máx. 2), fan-out/fan-in com plano de execução por ownership, gate de craft com loop de correção, auditoria de segurança com re-verificação, loop de qualidade tester→QA com roteamento de bug por dimensão e diagnóstico estrutural em não-convergência. Usa /ui-ux-pro-max, /impeccable e as satélites do Playbook 9 (Supabase, Stitch, knowledge-work, awesome-copilot) como ferramentas operadas pelo especialista. Autônomo: PARA nos 4 gates humanos (escopo/custo/produção/dados) — deploy só executa se pré-autorizado via args.autorizadoDeploy.',
   whenToUse: 'Rodar o núcleo não-interativo do /equipe em qualquer projeto. Faça o kickoff você mesmo e passe as respostas em args (ou modo:"auto" para o workflow classificar). Deploy e ações pagas ficam para você autorizar — ou pré-autorize o deploy com autorizadoDeploy:true.',
   phases: [
     { title: 'Kickoff + EQUIPE.md' },
@@ -155,6 +155,33 @@ const MODO_SCHEMA = {
 const CONTRATO = `Você faz parte de uma equipe orquestrada pelo workflow /equipe. Nomes canônicos com barra são fixos.
 Regras invioláveis (Princípio 6): NÃO crie serviço pago, NÃO rode operação destrutiva em dados (drop/delete em massa/migration irreversível em prod)${autorizadoDeploy ? '' : ', NÃO faça deploy em produção'}. Se o trabalho exigir uma dessas, PARE e devolva como pendência bloqueante — quem autoriza é o humano. Data do ciclo para registros: ${dataCiclo}.`
 
+// Playbook 9: satélites injetadas no despacho. O especialista carrega
+// `.agents/skills/<nome>/SKILL.md` ANTES de trabalhar no domínio. Satélite não segura bastão.
+function satelitesDo(skill) {
+  const mapa = {
+    '/product-manager': 'PRD/spec: write-spec, prd, create-specification, breakdown-feature-prd. Descoberta: product-brainstorming. Pesquisa: synthesize-research, user-research. Concorrência: competitive-brief. Roadmap/métricas: roadmap-update, metrics-review, stakeholder-update. GTM: gtm-0-to-1-launch, gtm-product-led-growth, gtm-positioning-strategy. Landing (com designer): landing-page-conversion-audit, seo-audit, content-creation.',
+    '/arquiteto-senior': 'OBRIGATÓRIO antes de qualquer SQL: supabase-postgres-best-practices DEPOIS supabase. Query: sql-queries, write-query, postgresql-optimization. ADR/C4: architecture, system-design, create-architectural-decision-record, architecture-blueprint-generator, cloud-design-patterns. Resgate: acquire-codebase-knowledge. Plano: create-implementation-plan. Dívida: tech-debt.',
+    '/designer-sites-senior': 'OBRIGATÓRIO: carregue skills/dev/designer-checklist-mestre.md inteiro, faça triagem 01–30 e execute os aplicáveis (filtro web; CWV P0). Relatório no formato da seção 6; zero P0; Apêndice D. Stitch (depois da semente /ui-ux-pro-max): taste-design + design-md → enhance-prompt → stitch-generate-design; site: stitch-loop, site-md; redesign: stitch-code-to-design. Crítica/handoff: design-critique, accessibility-review, ux-copy, design-handoff. Anti-slop: anti-ui-slop, web-design-reviewer, premium-frontend-ui. Motion: gsap-framer-scroll-animation. SEO/conversão: seo-audit, content-creation, landing-page-conversion-audit.',
+    '/designer-saas-senior': 'OBRIGATÓRIO: carregue skills/dev/designer-checklist-mestre.md inteiro, faça triagem 01–30 (filtro HIG/Material; zoom 200% = Dynamic Type; 320px = menor aparelho). Relatório seção 6; zero P0; Apêndice D. Stitch (filtro RN/Expo): taste-design + design-md → enhance-prompt → stitch-generate-design; stitch-react-native (você especifica). Crítica/handoff: design-critique, accessibility-review, ux-copy, design-handoff. Anti-slop/App Store: anti-ui-slop, premium-frontend-ui, apple-appstore-reviewer. Screenshots: ui-screenshots.',
+    '/dev-senior': 'OBRIGATÓRIO se toca banco: supabase-postgres-best-practices DEPOIS supabase. SQL lenta: postgresql-optimization, sql-optimization. Review SQL: postgresql-code-review, sql-code-review. Debug: debug. Review/refactor: code-review, review-and-refactor, refactor. Commit: git-commit, conventional-commit, conventional-branch. React 19: react19-concurrent-patterns, react19-test-patterns. Docs: documentation.',
+    '/engenheiro-senior-produto': 'UI: premium-frontend-ui, anti-ui-slop, web-design-reviewer. Stitch→código: stitch-react-components (web) / stitch-react-native (mobile). Motion: gsap-framer-scroll-animation. Copy: ux-copy. Se a feature toca banco: supabase + supabase-postgres-best-practices. Mais /impeccable craft/animate/polish.',
+    '/engenheiro-ia': 'Prompt/eval: finalize-agent-prompt, prompt-optimizer, eval-driven-dev, agentic-eval. Segurança de prompt/agente: ai-prompt-engineering-safety-review, agent-governance, agent-owasp-compliance. RAG/pgvector: supabase-postgres-best-practices + supabase.',
+    '/engenheiro-seguranca': 'Auditoria: security-review, audit-integrity. RLS/Auth: supabase + supabase-postgres-best-practices. Secrets/supply chain: secret-scanning, dependabot, codeql, github-actions-hardening. LGPD: gdpr-compliant, data-breach-blast-radius. Threat model: threat-model-analyst, tm7-threat-model. MCP/agente: mcp-security-audit, mcp-implementation-security-review, agent-owasp-compliance.',
+    '/tester': 'OBRIGATÓRIO: execute o checklist mestre desta skill. Bloco 0 antes de testar; Anexo A smoke 30 min; cada item OK/NOK/N/A com evidência; N/A sem justificativa = reprovado. Playwright/E2E: playwright-generate-test, playwright-explore-website, webapp-testing, chrome-devtools. Unitário: javascript-typescript-jest, react19-test-patterns. Bug: bug-reproduction-brief, bug-receipt. Estratégia: testing-strategy, quality-playbook. A11y/visual: accessibility-review, ui-screenshots.',
+    '/qa-senior': 'OBRIGATÓRIO: execute o checklist mestre desta skill. Seção 0 (entry) antes de aceitar o build; Seção 27 (exit) item a item no veredito; Bloqueador/Crítico = REPROVADA. Estratégia: testing-strategy, quality-playbook. Bug report: bug-reproduction-brief, bug-receipt. Dados: validate-data. Você julga; o /tester opera Playwright.',
+    '/engenheiro-devops': 'Migrations/CI: supabase + supabase-postgres-best-practices ANTES de db push. Pré-deploy: deploy-checklist. Actions: github-actions-efficiency, github-actions-hardening, create-github-action-workflow-specification. Release: github-release, devops-rollout-plan. Incidente: incident-response, incident-postmortem. Secrets: secret-scanning, dependabot.',
+    '/equipe': 'Orquestração: ai-team-orchestration. Auditoria do stack de skills: agent-skill-stack. Você NÃO opera satélites de ofício (banco, design, teste) — só roteia.',
+  }
+  const linhas = mapa[skill]
+  if (!linhas) return ''
+  return `
+## Skills satélites (Playbook 9)
+Catálogo: skills/dev/skills-satelites.md. Skills em .agents/skills/<nome>/SKILL.md.
+Carregue a SKILL.md ANTES de trabalhar no domínio cujo trigger casou — não o catálogo inteiro. Satélite não segura bastão.
+${linhas}
+`
+}
+
 function comoSkill(skill, missao, insumos, ferramentas, gate) {
   return `Atue como a skill ${skill}. Carregue e siga a skill integralmente.
 ${CONTRATO}
@@ -176,7 +203,7 @@ ${missao}
 ${ferramentas ? `## Ferramentas de frontend a operar neste turno
 ${ferramentas}
 Lembre: a ferramenta é insumo seu; a marca e os tokens finais são SUA decisão. A saída do /ui-ux-pro-max é semente — reconverta para OKLCH/tokens.ts e reverifique contraste AA par a par. O /impeccable é web-cêntrico: no mobile, filtre pela realidade RN/Expo (Reanimated, expo-router, safe areas).
-` : ''}## Fronteiras
+` : ''}${satelitesDo(skill)}## Fronteiras
 - NÃO edite o ${EQUIPE} nesta rodada (o condutor consolida o estado no fim). Devolva seu handoff estruturado.
 - Respeite decisões já registradas; conflito entre o pedido e uma decisão → sinalize como pendência, não resolva por conta.
 
@@ -437,7 +464,7 @@ const semente = temMarca
   ? 'NÃO gere design system novo — herde a marca/tokens existentes.'
   : '/ui-ux-pro-max: gere a semente do design system (paleta, tipografia, estilo, regras UX) — persista em design-system/MASTER.md. Reconverta para OKLCH/tokens e verifique AA par a par.'
 const ferramentasDesigner = `${semente}
-/impeccable: shape (enquadrar IA/UX) e craft/extract (tokens); critique+audit ANTES do handoff para preencher o checklist de craft; typeset/layout/animate para calibrar.`
+Stitch (Playbook 9): taste-design + design-md → enhance-prompt → stitch-generate-design (telas-chave). Mobile: filtre pela realidade RN/Expo. Depois /impeccable shape/craft; critique+audit ANTES do handoff (checklist de craft). typeset/layout/animate para calibrar. Fecha com design-critique + accessibility-review + design-handoff.`
 
 // /arquiteto-senior entra: sempre no projeto-do-zero; na feature-nova o próprio agente decide se a
 // feature muda schema/contrato (condicional do Playbook 2, registrada como decisão); nunca no redesign.

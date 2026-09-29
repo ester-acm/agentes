@@ -1,0 +1,115 @@
+{
+  "version": "1.1",
+  "project": "clinica-dual-lab",
+  "updatedAt": "2026-08-28T00:00:00.000Z",
+  "globalImpactPaths": [
+    "**/auth/**",
+    "**/middleware/**",
+    "**/permissions/**",
+    "package.json"
+  ],
+  "controls": [
+    {
+      "id": "q-lint",
+      "pillar": "QUALITY",
+      "surface": "lint",
+      "criticality": "high",
+      "command": "npm run lint",
+      "environment": "ci-ephemeral",
+      "frequency": "ALWAYS",
+      "impactPaths": ["**/*"],
+      "evidence": "pr-gate",
+      "status": "active"
+    },
+    {
+      "id": "s-authz-unit",
+      "pillar": "SECURITY",
+      "surface": "authz-unit",
+      "criticality": "critical",
+      "command": "npm test -- authz",
+      "environment": "ci-ephemeral",
+      "frequency": "ALWAYS",
+      "impactPaths": ["**/auth/**"],
+      "evidence": "pr-gate",
+      "status": "active"
+    },
+    {
+      "id": "s-rls-runtime",
+      "pillar": "SECURITY",
+      "surface": "rls-runtime",
+      "criticality": "critical",
+      "command": "npm run security:db",
+      "environment": "ci-ephemeral",
+      "frequency": "IMPACT",
+      "alsoPeriodic": true,
+      "impactPaths": ["supabase/migrations/**", "supabase/tests/**"],
+      "surfacePaths": ["supabase/migrations/**"],
+      "evidence": "ci-ephemeral",
+      "status": "active",
+      "requiresEphemeralStack": true
+    },
+    {
+      "id": "p-bundle",
+      "pillar": "PERFORMANCE",
+      "surface": "bundle-ci",
+      "criticality": "medium",
+      "command": "node scripts/perf-baseline.mjs",
+      "environment": "ci-ephemeral",
+      "frequency": "ALWAYS",
+      "impactPaths": ["**/*"],
+      "evidence": "pr-gate",
+      "status": "active"
+    },
+    {
+      "id": "p-db",
+      "pillar": "PERFORMANCE",
+      "surface": "db-explain",
+      "criticality": "medium",
+      "command": "npm run perf:db",
+      "environment": "ci-ephemeral",
+      "frequency": "IMPACT",
+      "alsoPeriodic": true,
+      "impactPaths": ["supabase/migrations/**"],
+      "surfacePaths": ["supabase/migrations/**"],
+      "evidence": "baseline",
+      "status": "active"
+    },
+    {
+      "id": "sec-periodic-audit",
+      "pillar": "SECURITY",
+      "surface": "dep-audit",
+      "criticality": "medium",
+      "command": "npm audit --audit-level=high",
+      "environment": "ci-ephemeral",
+      "frequency": "PERIODIC",
+      "impactPaths": [],
+      "evidence": "periodic",
+      "status": "active"
+    },
+    {
+      "id": "h-branch-protection",
+      "pillar": "QUALITY",
+      "surface": "branch-protection",
+      "criticality": "critical",
+      "command": null,
+      "environment": "human-panel",
+      "frequency": "HUMAN",
+      "impactPaths": [],
+      "evidence": "branch-protection.md",
+      "humanJustification": "Exige admin no GitHub; a implantacao nao configura ruleset sozinha.",
+      "status": "active"
+    }
+  ],
+  "sensitiveSurfaceDetectors": [
+    {
+      "id": "migrations",
+      "glob": "supabase/migrations/**/*.sql",
+      "requiresControlSurfaces": ["rls-runtime"]
+    },
+    {
+      "id": "unmapped-payment",
+      "glob": "**/payments/**",
+      "requiresControlSurfaces": ["payment-authz"]
+    }
+  ]
+}

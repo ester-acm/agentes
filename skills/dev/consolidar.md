@@ -103,7 +103,8 @@ Se não há `EQUIPE.md`, crie com o Template mínimo abaixo. **Não** invente pi
 - **Gate de craft (/impeccable):** não conduzido neste turno
 - **Auditoria de segurança:** não conduzida neste turno
 - **Gate de performance:** não conduzido neste turno
-- **Canvas do /tester:** não conduzido neste turno
+- **Canvas do /tester (prova de ciclo):** não conduzido neste turno
+- **QSP / QSP Gate:** [se o handoff citar mapa/Ficha/Gate, registre; senão: não conduzido]
 - **Veredito /qa-senior:** não conduzido neste turno
 
 ## 8. Histórico de handoffs (append-only)
@@ -128,6 +129,7 @@ Mapeie o Template 4 do especialista:
 | Ferramentas operadas | Uma linha no histórico (não seção própria) |
 | Pronto / bloqueado | Histórico: gate `✅` se pronto, `⚠️` se bloqueado (você **não** revalida o ofício) |
 | Veredito APROVADA/REPROVADA (só `/qa-senior`) | Seção 7 + linha de decisão na 3 |
+| Ficha / mapa QSP / QSP Gate | Seção 7 (campos QSP) + seção 4 se for artefato novo; você **não** julga o Gate |
 
 Disciplina:
 

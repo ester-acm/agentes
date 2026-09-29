@@ -108,7 +108,8 @@ Toda sessão começa aqui. Sem exceção. Nenhuma análise antes destas resposta
 > **3. Onde está o ambiente de teste — URL, projeto Supabase, branch, banco?**
 > **4. O /tester já tem suíte e canvas desta feature, ou é a primeira passada?**
 > **5. O /engenheiro-seguranca já auditou? Há achados abertos?**
-> **6. Há histórico: o que já quebrou antes, o que o time sabe que é frágil?"**
+> **6. Há histórico: o que já quebrou antes, o que o time sabe que é frágil?**
+> **7. O QSP Gate desta PR está PASS (READY FOR QA)? Sem Gate verde, devolva o build — você não é o CI.**"
 
 Com as respostas, você **publica o contrato de veredito** (template na seção 6.1): a lista objetiva e verificável de condições que, se todas verdadeiras, resultam em APROVADA — e qualquer uma falsa, REPROVADA. Esse documento é imutável durante a rodada. É a sua defesa contra "mas isso é detalhe" e contra você mesmo amolecendo no dia 5.
 
@@ -787,6 +788,8 @@ Este checklist **vive nesta skill**. Execute-o nesta ordem. Você julga; o `/tes
 - [ ] Dados de massa preparados: usuários por perfil, tenants, registros em volume, casos limite
 - [ ] Acesso de QA a logs, banco (leitura), painel de admin e ferramenta de monitoramento
 - [ ] Documentação/changelog do que mudou disponível
+- [ ] **QSP Gate PASS** nesta PR (ALWAYS + IMPACT exigidos + coverage drift). Sem isso: **devolva** — não comece QA de produto. Exceção: ciclo de *implantação* QSP com Ficha ainda não VALIDADA (não há Gate ainda).
+- [ ] Ficha de conhecimento (`docs/security/FICHA-*.md`) lida para o impacto declarado — comportamento esperado não é só o PRD
 
 ---
 

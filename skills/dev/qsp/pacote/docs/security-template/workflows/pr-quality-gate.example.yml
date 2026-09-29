@@ -1,0 +1,22 @@
+# DEPRECATED — NÃO USAR EM IMPLANTAÇÃO NOVA (pacote V1.1)
+#
+# Padrão atual:
+#   workflows/pr-qsp-gate.example.yml
+#
+# Este arquivo existe só para não confundir quem achar o nome antigo.
+# Sempre FALHA (fail-closed). O agente NÃO deve escolher este YAML.
+
+name: PR Quality Security Performance Gate (DEPRECATED — use pr-qsp-gate)
+
+on:
+  pull_request:
+
+jobs:
+  deprecated:
+    name: DEPRECATED pointer
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "DEPRECATED: use docs/security-template/workflows/pr-qsp-gate.example.yml"
+          echo "NÃO CONFIGURADO / INCOMPLETO — este workflow não é o Gate V1.1"
+          exit 1

@@ -1,0 +1,37 @@
+{
+  "tool": "supabomb",
+  "origin": "https://github.com/ModernPentest/supabomb",
+  "packageVersion": "0.1.0",
+  "pinnedCommit": "3ccc6befa598ea015f48d3e3563d0f9ac417a4f6",
+  "pinnedCommitShort": "3ccc6befa598",
+  "pinnedAt": "2025-11-02T17:55:20Z",
+  "pinnedReason": "Último commit em main sem tags Git; inclui --json e --output report. NÃO usar main/latest flutuante.",
+  "requiresPython": ">=3.13",
+  "runner": "uv run supabomb",
+  "optionalExternalTools": ["katana (apenas discover profundo — NÃO necessário no periodic CI padrão)"],
+  "validatedCapabilities": {
+    "rlsAnonAccess": true,
+    "anonVsAuthenticated": true,
+    "rpc": true,
+    "storage": true,
+    "edgeJwt": true,
+    "jsonReport": true,
+    "structuredOutputFlag": true
+  },
+  "validatedLimitations": {
+    "customOrLocalEndpoint": false,
+    "baseUrlHardcoded": "https://{project_ref}.supabase.co (models.SupabaseCredentials.base_url)",
+    "exitCodeOnFindings": false,
+    "exitCodeNote": "CLI Click tipicamente exit 0 mesmo com findings; o wrapper do pacote avalia o JSON e define PASS/FAIL/INCOMPLETE.",
+    "sampleDataInEvidence": true,
+    "credentialCacheFile": ".supabomb.json — NUNCA publicar como artifact",
+    "clientKey": "legacy anon JWT only; publishable-only sem anon → INCOMPLETE (não inventar compatibilidade; não usar service_role)",
+    "environmentStrategy": "EPHEMERAL_PREVIEW (Management API branches) preferido; EXISTING_NON_PROD fallback; produção proibida"
+  },
+  "updateProcedure": [
+    "1. Revisar changelog/diff do commit candidato no GitHub ModernPentest/supabomb",
+    "2. Validar localmente em Preview Branch / staging autorizado NÃO produtivo",
+    "3. Atualizar este PIN + workflow + self-tests se contratos mudarem",
+    "4. NÃO atualizar automaticamente em CI"
+  ]
+}

@@ -1,0 +1,16 @@
+# DEPRECATED — NÃO USAR EM IMPLANTAÇÃO NOVA (pacote V1.1)
+# Padrão atual: workflows/periodic-qsp.example.yml
+# Sempre FALHA (fail-closed).
+
+name: Periodic QSP (DEPRECATED — use periodic-qsp)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deprecated:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "DEPRECATED: use docs/security-template/workflows/periodic-qsp.example.yml"
+          exit 1

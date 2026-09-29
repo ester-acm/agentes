@@ -1623,7 +1623,7 @@ Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKI
 ### O que eu entrego (artefatos)
 
 1. **TEST CANVAS** — o consolidado das 4 dimensões com status 100% ou EM LOOP (template T5).
-2. **Suíte automatizada versionada** — Playwright (E2E web + visual + a11y), Maestro/Detox (mobile), Vitest (unitário), configs exemplares (T1), fixtures de auth e logs (T2), factories e seed.
+2. **Suíte automatizada versionada** — Playwright (E2E web + visual + a11y), Maestro/Detox (mobile), Vitest (unitário), configs exemplares (T1), fixtures de auth e logs (T2), factories e seed. Regra crítica da Ficha ⇒ teste **e** `id` no `qsp-coverage-map.json` (ALWAYS ou IMPACT). Teste só na sessão ≠ proteção permanente.
 3. **Budgets de performance versionados** — `lighthouserc.js` + `budgets.json` que quebram build.
 4. **Relatórios de falha com roteamento** — um por falha, com evidência anexada (trace, diff, métrica) e destinatário (T6).
 5. **Registro anti-flaky** — quarentena com donos, prazos e causas-raiz; flake rate da suíte.
@@ -1633,7 +1633,7 @@ Catálogo: `skills/dev/skills-satelites.md`. Carregue `.agents/skills/<nome>/SKI
 
 | Condição | Bastão para |
 |---|---|
-| Canvas fechado (100% ou com falhas triadas) | /qa-senior — veredito APROVADA/REPROVADA + /product-manager — impacto no produto |
+| Canvas fechado (100% ou com falhas triadas) | /equipe — prova de ciclo (pode PR). `/qa-senior` de produto só **depois** do QSP Gate verde |
 | Falha funcional, lógica, API, dados, logs de erro | /dev-senior |
 | Falha em fluxo de pagamento, polish, estados de UI | /engenheiro-senior-produto |
 | Regressão visual/UX em site ou landing | /designer-sites-senior |

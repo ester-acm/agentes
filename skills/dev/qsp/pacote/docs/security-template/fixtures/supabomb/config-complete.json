@@ -1,0 +1,29 @@
+{
+  "version": "1.1",
+  "applicable": true,
+  "applicabilityJustification": "Fixture: projeto Supabase com Preview Branch",
+  "enabled": true,
+  "environmentStrategy": "EPHEMERAL_PREVIEW",
+  "environmentMode": "ephemeral-preview",
+  "branching": {
+    "available": true,
+    "parentProjectRef": "fixture-parent-ref",
+    "withData": false
+  },
+  "forbidProduction": true,
+  "productionProjectRefs": ["fixture-production-ref"],
+  "target": {
+    "label": "fixture-ephemeral",
+    "projectRef": "",
+    "isProduction": false,
+    "authorizationRecord": "fixture-only"
+  },
+  "policy": {
+    "failOnCritical": true,
+    "failOnHigh": true,
+    "failOnMedium": false,
+    "failOnLow": false,
+    "failOnInfo": false
+  },
+  "schedule": { "staleAfterDays": 22 }
+}

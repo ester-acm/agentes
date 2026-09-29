@@ -1,0 +1,239 @@
+# PR QSP Gate V1.1 (EXEMPLO)
+#
+# Arquitetura:
+#   ALWAYS  → quality + security_always + performance_always + coverage_drift
+#   IMPACT  → jobs condicionais (RLS/Storage/Edge/Perf DB|Edge) via mapa
+#   qsp-gate → AGREGADOR obrigatório (falha em skip indevido / gap / falha)
+#
+# Copiar para .github/workflows/ e ADAPTAR comandos/paths ao projeto.
+# Placeholders críticos: FAIL-CLOSED.
+# CONFIGURADO ≠ VALIDADO.
+# Sem produção / secrets reais / deploy.
+#
+# Required check na branch protection: **QSP Gate** (este job agregador).
+
+name: PR QSP Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: pr-qsp-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve-impact:
+    name: Resolve IMPACT
+    runs-on: ubuntu-latest
+    outputs:
+      run_rls: ${{ steps.impact.outputs.run_rls }}
+      run_storage: ${{ steps.impact.outputs.run_storage }}
+      run_edge: ${{ steps.impact.outputs.run_edge }}
+      run_perf_db: ${{ steps.impact.outputs.run_perf_db }}
+      run_perf_edge: ${{ steps.impact.outputs.run_perf_edge }}
+      impact_ids: ${{ steps.impact.outputs.impact_ids }}
+      global_impact: ${{ steps.impact.outputs.global_impact }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate map (fail-closed)
+        run: |
+          set -euo pipefail
+          if [ ! -f docs/security/qsp-coverage-map.json ]; then
+            echo "NÃO CONFIGURADO / INCOMPLETO: docs/security/qsp-coverage-map.json (gerar na implantação — não copiar example como definitivo)"
+            exit 1
+          fi
+          node scripts/qsp-validate-map.mjs
+      - id: impact
+        env:
+          QSP_BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          node scripts/qsp-impact.mjs
+
+  coverage_drift:
+    name: Coverage drift
+    runs-on: ubuntu-latest
+    needs: resolve-impact
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          QSP_BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          node docs/security-template/scripts/qsp-coverage-drift.example.mjs
+
+  quality:
+    name: Quality (ALWAYS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: node scripts/check-client-secrets.mjs
+
+  security_always:
+    name: Security (ALWAYS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Unit regressions (authz / ownership / MFA policy)
+        run: |
+          set -euo pipefail
+          # Adaptar aos testes REAIS do projeto
+          npx vitest run lib/authzRole.test.ts lib/mfaPolicy.test.ts lib/subscriptionOwnership.test.ts
+      - name: Static security markers (complementar — não substitui runtime)
+        run: node scripts/verify-security-migrations.mjs
+
+  performance_always:
+    name: Performance (ALWAYS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Critical permanent set (bundle/CI budgets)
+        run: node scripts/perf-baseline.mjs
+
+  # ——— IMPACT: runtime Security (ambiente descartável) ———
+  security_rls_runtime:
+    name: Security RLS runtime (IMPACT)
+    needs: resolve-impact
+    if: needs.resolve-impact.outputs.run_rls == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ephemeral DB / Supabase (adaptar)
+        run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO até adaptar ao stack"
+          echo "Supabase: ver stack-examples/supabase/workflow-snippet-supabase-security.yml"
+          echo "Outros: Testcontainers / Docker Compose / banco efêmero"
+          echo "Obrigatório: migrations do zero + seed sintético + RLS A×B + anon + grants"
+          exit 1
+
+  security_storage_runtime:
+    name: Security Storage runtime (IMPACT)
+    needs: resolve-impact
+    if: needs.resolve-impact.outputs.run_storage == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO: upload/leitura permitida×proibida, bucket público/privado, cross-user deny"
+          exit 1
+
+  security_edge_runtime:
+    name: Security Edge/API runtime (IMPACT)
+    needs: resolve-impact
+    if: needs.resolve-impact.outputs.run_edge == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO: sem auth / auth inválida / sem permissão / outro tenant → nega; autorizado → permite; side-effect só após authz; mock providers"
+          exit 1
+
+  performance_db_impact:
+    name: Performance DB (IMPACT)
+    needs: resolve-impact
+    if: needs.resolve-impact.outputs.run_perf_db == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO: EXPLAIN/budget DB do projeto em ambiente descartável"
+          exit 1
+
+  performance_edge_impact:
+    name: Performance Edge/API (IMPACT)
+    needs: resolve-impact
+    if: needs.resolve-impact.outputs.run_perf_edge == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO: latência Edge/API vs budget; mocks de providers"
+          exit 1
+
+  qsp-gate:
+    name: QSP Gate
+    if: always()
+    needs:
+      - resolve-impact
+      - coverage_drift
+      - quality
+      - security_always
+      - performance_always
+      - security_rls_runtime
+      - security_storage_runtime
+      - security_edge_runtime
+      - performance_db_impact
+      - performance_edge_impact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Aggregate QSP results
+        env:
+          QSP_IMPACT_IDS: ${{ needs.resolve-impact.outputs.impact_ids }}
+          QSP_DRIFT_OK: ${{ needs.coverage_drift.result == 'success' }}
+          QSP_JOB_RESULTS: >-
+            {
+              "quality": "${{ needs.quality.result }}",
+              "security_always": "${{ needs.security_always.result }}",
+              "performance_always": "${{ needs.performance_always.result }}",
+              "coverage_drift": "${{ needs.coverage_drift.result }}",
+              "s-rls-runtime": "${{ needs.security_rls_runtime.result }}",
+              "s-storage-runtime": "${{ needs.security_storage_runtime.result }}",
+              "s-edge-authz": "${{ needs.security_edge_runtime.result }}",
+              "p-db": "${{ needs.performance_db_impact.result }}",
+              "p-edge": "${{ needs.performance_edge_impact.result }}"
+            }
+        run: |
+          set -euo pipefail
+          # Tratar "skipped" de IMPACT não selecionado como OK no agregador adaptado.
+          # O example falha se IMPACT id estiver na lista e skipped — ajustar scripts/qsp-gate-aggregator.mjs
+          node docs/security-template/scripts/qsp-gate-aggregator.example.mjs

@@ -30,8 +30,11 @@ Quatro camadas. Só a primeira segura o **bastão** de produto.
 | **`/equipe`** | Maestro: classifica modo, despacha, valida gates, guarda o `EQUIPE.md` | Conduz o ciclo; não escreve produto |
 | **`/consolidar`** | Secretário do canvas, só em invocação **solta** | Não. Não despacha ninguém |
 | **Comandos da casa + satélites** | Ferramentas que o especialista opera **dentro do turno** | Nunca |
+| **QSP (CI)** | Governança depois do commit: Ficha + mapa + Gate na PR + periódico | Nunca. Não é o 13º agente |
 
 Regra: o especialista decide; a ferramenta propõe. Satélite não aparece no histórico de handoff como dono. Roteamento completo: [`skills/dev/skills-satelites.md`](skills/dev/skills-satelites.md).
+
+QSP é o mesmo ecossistema, outro motor: agentes **constroem e alimentam o mapa**; a máquina **julga a PR**. Contrato: [`skills/dev/qsp/ECOSSISTEMA.md`](skills/dev/qsp/ECOSSISTEMA.md). Pacote: [`skills/dev/qsp/pacote/`](skills/dev/qsp/pacote/). Para ver na prática: `node labs/qsp-ecossistema/demo.mjs`.
 
 ---
 
@@ -56,7 +59,11 @@ skills/
 │   ├── equipe.md                      # orquestrador (fonte de verdade)
 │   ├── equipe.workflow.js             # pipeline executável (6 modos + consolidar)
 │   ├── consolidar.md
-│   └── skills-satelites.md            # quem puxa qual satélite
+│   ├── skills-satelites.md            # quem puxa qual satélite
+│   └── qsp/                           # governança CI (não é membro)
+│       ├── ECOSSISTEMA.md             # contrato: agentes alimentam, máquina julga
+│       └── pacote/                    # POP + Ficha + template técnico (do pacote universal)
+labs/qsp-ecossistema/                  # demo rodável: node demo.mjs
 ├── impeccable/                   # craft / auditoria / polish de frontend (web)
 └── framer-motion-animator/       # motion declarativo (Framer Motion)
 .cursor/skills/<nome>/SKILL.md    # wrappers Cursor → skills/dev/<nome>.md
@@ -97,6 +104,7 @@ Cada skill de especialista é markdown com frontmatter (`name`, `description`) +
 | `consolidar` | Secretário do `EQUIPE.md`: grava handoff de invocação **solta**. Não classifica modo, não despacha, não valida gate de produto |
 | `skills-satelites` | Catálogo: qual especialista carrega cada satélite; comando → agente |
 | `designer-checklist-mestre` | Lei de auditoria de design (30 blocos). Operada pelos dois designers no próprio turno |
+| `qsp/` | Camada de governança no CI (Ficha, mapa, Gate). **Não** é comando `/`. Segurança implanta; devops liga o workflow; o Gate julga a PR |
 
 Wrappers Cursor existem só para os **12 + `/equipe` + `/consolidar`**. Checklist e catálogo não são comandos `/`.
 
@@ -137,7 +145,7 @@ Nenhum agente cruza sozinho: **mudança de escopo**, **custo** (serviço pago, p
 
 ### Loop de qualidade
 
-Gate de craft (`/impeccable audit` + `critique`) → `/engenheiro-seguranca` → `/engenheiro-performance` → `/tester` (4 dimensões) → `/qa-senior`. REPROVADA roteia o bug ao dono; o tester **re-roda a suíte inteira**. Só fecha APROVADA.
+Gate de craft (`/impeccable audit` + `critique`) → `/engenheiro-seguranca` → `/engenheiro-performance` → `/tester` (prova de ciclo) → **PR** → **QSP Gate** (ALWAYS + IMPACT + drift) → `/qa-senior` só com Gate verde. REPROVADA roteia o bug ao dono; o tester **re-roda a suíte inteira**. Merge exige o check `QSP Gate`. O QSP não é um agente.
 
 ---
 

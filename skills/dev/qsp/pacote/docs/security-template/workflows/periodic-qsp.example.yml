@@ -1,0 +1,168 @@
+# Periodic QSP Sweep V1.1 (EXEMPLO) — padrão atual
+
+# Reutiliza o mapa REAL do projeto e executa cobertura MAIS AMPLA que a PR.
+# Inclui coverage drift FULL-REPO (fail-closed).
+# Placeholders críticos: FAIL-CLOSED.
+# CONFIGURADO ≠ VALIDADO.
+# Sem produção.
+#
+# NÃO usar periodic-security.example.yml (DEPRECATED).
+
+name: Periodic QSP Sweep
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: periodic-qsp-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate_map:
+    name: Validate QSP map
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          set -euo pipefail
+          test -f docs/security/qsp-coverage-map.json
+          node scripts/qsp-validate-map.mjs
+
+  quality:
+    name: Quality (wide)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: node scripts/check-client-secrets.mjs
+
+  dependencies:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+
+  coverage_drift_full_repo:
+    name: Coverage drift (full-repo)
+    needs: validate_map
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Full-repo drift + PERIODIC executed set
+        env:
+          QSP_DRIFT_MODE: full-repo
+          QSP_REPO_ROOT: ${{ github.workspace }}
+          # Adaptar: listar ids PERIODIC realmente executados neste workflow
+          QSP_PERIODIC_EXECUTED_IDS: ${{ vars.QSP_PERIODIC_EXECUTED_IDS || 'REPLACE_WITH_REAL_PERIODIC_IDS' }}
+        run: |
+          set -euo pipefail
+          if [ "${QSP_PERIODIC_EXECUTED_IDS}" = "REPLACE_WITH_REAL_PERIODIC_IDS" ]; then
+            echo "NÃO CONFIGURADO / INCOMPLETO: definir QSP_PERIODIC_EXECUTED_IDS com ids reais do sweep"
+            exit 1
+          fi
+          node scripts/qsp-coverage-drift.mjs
+
+  security_runtime_wide:
+    name: Security runtime (wide)
+    needs: validate_map
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO até adaptar runtime descartável do stack"
+          echo "Supabase opcional: stack-examples/supabase/"
+          exit 1
+
+  performance_sweep:
+    name: Performance sweep (wide)
+    needs: validate_map
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/perf-baseline.mjs
+      - run: |
+          set -euo pipefail
+          echo "NÃO CONFIGURADO / INCOMPLETO: executar perf DB/API/Edge conforme mapa PERIODIC/alsoPeriodic"
+          exit 1
+
+  human_external_reminder:
+    name: HUMAN/EXTERNAL checklist
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Controles HUMAN (MFA dashboard, branch protection, DPA) não são validados aqui."
+          echo "Sem required check QSP Gate na branch: IMPLANTAÇÃO REAL DO BLOQUEIO DE MERGE = PENDENTE."
+
+  # Supabomb = workflow SEPARADO (periodic-supabomb). Aqui só registra stale se aplicável.
+  supabomb_stale_check:
+    name: Supabomb stale check (if applicable)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Stale / N/A
+        run: |
+          set -euo pipefail
+          if [ ! -f docs/security/supabomb.config.json ]; then
+            echo "Supabomb N/A ou ainda não configurado neste repo — sem stale check."
+            exit 0
+          fi
+          python - <<'PY'
+          import json,sys
+          c=json.load(open('docs/security/supabomb.config.json'))
+          if c.get('applicable') is False:
+            print('Supabomb N/A justificado')
+            sys.exit(0)
+          if c.get('enabled') is not True:
+            print('INCOMPLETE: Supabomb aplicável mas enabled!=true (HUMAN-SETUP)')
+            sys.exit(1)
+          PY
+          if [ ! -f security-reports/supabomb/supabomb-last-run.json ]; then
+            echo "INCOMPLETE/STALE: sem última execução válida registrada (workflow separado pode não ter rodado)"
+            exit 1
+          fi
+          if [ -f scripts/supabomb-stale-check.mjs ]; then
+            SUPABOMB_LAST_RUN_JSON=security-reports/supabomb/supabomb-last-run.json \
+              node scripts/supabomb-stale-check.mjs
+          else
+            echo "INCOMPLETE: scripts/supabomb-stale-check.mjs ausente"
+            exit 1
+          fi

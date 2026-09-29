@@ -1,0 +1,18 @@
+{
+  "version": "1.1",
+  "project": "fixture-no-executor",
+  "controls": [
+    {
+      "id": "s-rls-runtime",
+      "pillar": "SECURITY",
+      "surface": "rls-runtime",
+      "criticality": "critical",
+      "command": "",
+      "environment": "ci-ephemeral",
+      "frequency": "IMPACT",
+      "impactPaths": ["supabase/migrations/**"],
+      "evidence": "none",
+      "status": "active"
+    }
+  ]
+}

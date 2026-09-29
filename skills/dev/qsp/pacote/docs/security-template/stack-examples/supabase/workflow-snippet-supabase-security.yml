@@ -1,0 +1,72 @@
+# Snippet — Security runtime Supabase no CI (V1.1)
+# Incorporar nos jobs IMPACT / periódico do pr-qsp-gate / periodic-qsp.
+# NUNCA --linked / produção. Pinar CLI. Placeholders incompletos → exit 1.
+
+  supabase-security-runtime:
+    name: Security runtime (Supabase ephemeral)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 'REPLACE_WITH_PINNED_VERSION'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Start ephemeral Supabase
+        run: |
+          set -euo pipefail
+          supabase start
+          supabase db reset --yes
+
+      - name: DB / RLS / grants / RPC
+        run: |
+          set -euo pipefail
+          # Adaptar: supabase test db  e/ou  npm run security:db
+          if [ -d supabase/tests ]; then
+            supabase test db
+          else
+            echo "NÃO CONFIGURADO / INCOMPLETO: supabase/tests ausente"
+            exit 1
+          fi
+
+      - name: Isolation A×B (script do projeto)
+        run: |
+          set -euo pipefail
+          # Ex.: node scripts/run-local-supabase-validation.mjs (adaptado a CI)
+          if [ -f scripts/run-local-supabase-validation.mjs ]; then
+            node scripts/run-local-supabase-validation.mjs
+          else
+            echo "NÃO CONFIGURADO / INCOMPLETO: script de isolamento A×B"
+            exit 1
+          fi
+
+      - name: Storage contract
+        run: |
+          set -euo pipefail
+          # Verificar bucket flags + policies via SQL ou script
+          echo "Adaptar: npm run security:storage ou SQL 01_example_storage_policies"
+          # fail-closed até existir:
+          # exit 1
+
+      - name: Edge authz smoke (mocks — sem secrets de prod)
+        env:
+          # Placeholders / mocks apenas
+          MISTRAL_API_KEY: ''
+          STRIPE_SECRET_KEY: ''
+        run: |
+          set -euo pipefail
+          echo "Adaptar: npm run security:edge"
+          echo "Matriz: no auth / bad auth / no permission / cross-tenant deny / authorized allow"
+          # exit 1 até adaptar
+
+      - if: always()
+        name: Stop
+        run: supabase stop --no-backup || true

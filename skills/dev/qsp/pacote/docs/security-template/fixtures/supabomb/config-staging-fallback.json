@@ -1,0 +1,25 @@
+{
+  "version": "1.1",
+  "applicable": true,
+  "enabled": true,
+  "environmentStrategy": "EXISTING_NON_PROD",
+  "environmentMode": "authorized-non-prod",
+  "branching": { "available": false },
+  "existingNonProd": {
+    "authorized": true,
+    "label": "fixture-staging",
+    "authorizationRecord": "fixture"
+  },
+  "forbidProduction": true,
+  "productionProjectRefs": ["fixture-production-ref"],
+  "target": {
+    "label": "fixture-staging",
+    "projectRef": "fixture-staging-ref",
+    "isProduction": false
+  },
+  "policy": {
+    "failOnCritical": true,
+    "failOnHigh": true
+  },
+  "schedule": { "staleAfterDays": 22 }
+}

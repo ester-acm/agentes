@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "applicable": true,
+  "enabled": false,
+  "environmentMode": "authorized-non-prod",
+  "target": { "label": "unset", "projectRef": "" },
+  "policy": { "failOnHigh": true }
+}

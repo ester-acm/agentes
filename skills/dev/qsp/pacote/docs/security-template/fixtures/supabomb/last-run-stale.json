@@ -1,0 +1,10 @@
+{
+  "at": "2020-01-01T00:00:00.000Z",
+  "status": "PASS",
+  "scanStatus": "PASS",
+  "cleanupRequired": true,
+  "cleanupStatus": "PASS",
+  "reason": "fixture-stale-by-age",
+  "counts": { "critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0 },
+  "environmentStrategy": "EPHEMERAL_PREVIEW"
+}

@@ -792,6 +792,7 @@ Regras: ADR é **append-only** — decisão mudou, escreva outro que supersede e
 - ❌ **Diagrama que não bate com o código** — atualize no mesmo PR ou apague; desatualizado é pior que nenhum
 - ❌ **Entregar o desenho e sumir** — quando a implementação revela furo, a correção do desenho é sua e é imediata
 - ❌ **Projetar para a escala imaginária** — projete para 10k e escreva a rota de evolução; construir para 1M no dia zero é roubar velocidade do produto
+- ❌ **Contrato novo (API, RLS, job, pagamento) sem `impactPaths` sugeridos** — o Dev não pode descobrir superfície no escuro; o mapa QSP precisa desses paths
 
 ---
 

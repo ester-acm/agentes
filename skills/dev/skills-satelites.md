@@ -32,8 +32,9 @@ O `/equipe` injeta esta lista no despacho. O especialista puxa **só as satélit
 | Update de stakeholder | `stakeholder-update` | KW |
 | Go-to-market (lançamento, PLG, posicionamento) | `gtm-0-to-1-launch`, `gtm-product-led-growth`, `gtm-positioning-strategy` | copilot |
 | Landing / conversão (com designer) | `landing-page-conversion-audit`, `seo-audit`, `content-creation` | copilot + KW |
+| Ficha QSP (1ª vez / EM VALIDAÇÃO com buracos de negócio) | Playbook 13 da skill (preencher a partir do projeto; humano valida; nunca VALIDADA) | casa |
 
-**No fluxo:** kickoff → PRD. `write-spec`/`prd` **antes** de redigir o PRD. `product-brainstorming` na descoberta. `synthesize-research` quando há entrevistas.
+**No fluxo:** kickoff → PRD. `write-spec`/`prd` **antes** de redigir o PRD. `product-brainstorming` na descoberta. `synthesize-research` quando há entrevistas. Sem mapa QSP (ou Ficha com permissão em branco) → Playbook 13 **antes** do HARD STOP humano.
 
 ### `/arquiteto-senior`  ← banco (desenho)
 
@@ -125,6 +126,7 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | LGPD | `gdpr-compliant`, `data-breach-blast-radius` | copilot |
 | Threat model | `threat-model-analyst`, `tm7-threat-model` | copilot |
 | MCP / agente | `mcp-security-audit`, `mcp-implementation-security-review`, `agent-owasp-compliance` | copilot |
+| **QSP ausente / implantar padrão** | Prompt Mestre + POP em `skills/dev/qsp/pacote/` (ou `~/.cursor/skills/qsp/pacote/`) + `ECOSSISTEMA.md` | casa |
 
 ### `/engenheiro-performance`
 
@@ -148,6 +150,9 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | Estratégia de cobertura | `testing-strategy`, `quality-playbook` | KW + copilot |
 | A11y | `accessibility-review` | KW |
 | Visual | `ui-screenshots` | copilot |
+| Regressão da Ficha / mapa QSP | id ALWAYS/IMPACT em `docs/security/qsp-coverage-map.json` — teste só na sessão ≠ permanente | casa |
+
+**No fluxo:** canvas verde = prova de ciclo (pode PR). `/qa-senior` de produto espera o QSP Gate.
 
 ### `/qa-senior`
 
@@ -156,6 +161,7 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | Estratégia / qualidade | `testing-strategy`, `quality-playbook` | KW + copilot |
 | Bug report padrão-ouro | `bug-reproduction-brief`, `bug-receipt` | copilot |
 | Validar análise / dados de teste | `validate-data` | KW |
+| QA de produto (PR) | QSP Gate PASS é entry — `ECOSSISTEMA.md` (repo ou `~/.cursor/skills/qsp/`); sem Gate verde, devolva | casa |
 
 ### `/engenheiro-devops`
 
@@ -164,6 +170,7 @@ Mais `/impeccable craft/animate/polish` (comando da casa).
 | **Migrations em CI / `supabase db push` / config.toml** | `supabase` + `supabase-postgres-best-practices` | supabase |
 | Checklist pré-deploy | `deploy-checklist` | KW |
 | GitHub Actions | `github-actions-efficiency`, `github-actions-hardening`, `create-github-action-workflow-specification` | copilot |
+| **CI do produto / QSP Gate** | Contrato `ECOSSISTEMA.md` (repo ou `~/.cursor/skills/qsp/`); workflows em `pacote/docs/security-template/workflows/` — required check = `QSP Gate`; **não** manter quality-gate paralelo | casa |
 | Release | `github-release`, `devops-rollout-plan` | copilot |
 | Incidente / postmortem | `incident-response`, `incident-postmortem` | KW + copilot |
 | Secrets no pipeline | `secret-scanning`, `dependabot` | copilot |

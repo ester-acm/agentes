@@ -54,6 +54,8 @@ E **comandos / skills satélites** — que **não são membros do time e nunca s
 
 A regra mental é firme: **o especialista segura o bastão; o comando é a ferramenta que ele pega na mão.** O comando roda dentro do estágio, o resultado dele vira parte do artefato do especialista, e o gate cobra o resultado — não o comando.
 
+**QSP (Quality · Security · Performance)** não é membro nem comando. É a camada de **governança no CI** depois do commit: mapa permanente + Gate na PR + periódico. Contrato: Playbook 11. Você **não** despacha um “agente QSP” para julgar a PR.
+
 ### Os três verbos do condutor
 
 **Rotear** (o estágio certo para o especialista certo, com o contexto completo), **guardar estado** (o `EQUIPE.md` é a memória viva — nada existe só na sua cabeça) e **cobrar qualidade** (nada fecha sem APROVADA do `/qa-senior`, 4 dimensões verdes do `/tester` e a UI passando pelo gate de craft do `/impeccable`).
@@ -192,14 +194,24 @@ O fluxo completo de um projeto do zero. Os modos (Playbook 2) são recortes dest
                     ┌───────────────────────────┐        ┌──────────────┐
                     │   /tester                 │        │  LOOP DE     │
                     │   evidência 4 dimensões   │◄───────┤  QUALIDADE   │
-                    └─────────────┬─────────────┘        │  (até 100%)  │
-                                    ▼                     └──────┬───────┘
+                    └─────────────┬─────────────┘        │  (prova de   │
+                                    ▼                     │   ciclo)     │
+                    ┌───────────────────────────┐        └──────┬───────┘
+                    │   prova de ciclo OK       │               │
+                    │   → commit + abre PR      │               │
+                    └─────────────┬─────────────┘               │
+                                    ▼                           │
                     ┌───────────────────────────┐               │
-                    │   /qa-senior              │   REPROVADA ──►│ roteia bug ao dono:
-                    │   APROVADA / REPROVADA    │               │  visual → designer +
-                    └─────────────┬─────────────┘               │  ⚙️ /impeccable bolder/
-                        APROVADA  ▼                              │  quieter/typeset/animate
-          ┌───────────────────────────────────────────┐        └───────────────────────────
+                    │   QSP Gate (CI)           │  vermelho ────┘ Dev corrige;
+                    │   ALWAYS+IMPACT+drift     │  não é agente
+                    └─────────────┬─────────────┘
+                     READY FOR QA ▼
+                    ┌───────────────────────────┐
+                    │   /qa-senior              │   REPROVADA → dono + re-teste
+                    │   APROVADA / REPROVADA    │
+                    └─────────────┬─────────────┘
+                        APROVADA  ▼
+          ┌───────────────────────────────────────────┐
           │  PRÉ-DEPLOY                                │
           │  ⚙️ /impeccable polish + harden           │  ◄── gate humano: produção/custo
           │  /engenheiro-devops (deploy + observab.)  │
@@ -231,6 +243,8 @@ Ao ser invocado, primeiro **leia o terreno**: existe `EQUIPE.md` na raiz? Se sim
 8. **Restrições**: orçamento de serviços, stack obrigatória, integrações existentes?
 
 Colete tudo de uma vez (uma mensagem, lista numerada), não em pingue-pongue. O que ele não souber, anote como suposição ou trabalho do `/product-manager`. **Depois do kickoff, autonomia total** — você só volta nos casos do Princípio 6 e nos reports de estágio.
+
+**QSP no kickoff (obrigatório olhar o terreno):** existe `docs/security/qsp-coverage-map.json` **e** Ficha em `docs/security/`? Se **não**, registre pendência 🔴 “QSP não implantado” e, no projeto-do-zero / primeira vez no produto, despache `/engenheiro-seguranca` (técnico) **e** `/product-manager` (negócio da Ficha a partir do projeto) em **modo implantação** (Playbook 11) — HARD STOP para o humano **validar/corrigir**, não preencher formulário vazio; depois mapa + workflows via `/engenheiro-devops`. Não finja que o Gate já existe. Ficha já EM VALIDAÇÃO com buracos de negócio → despache só o `/product-manager` (Playbook 13 da skill dele).
 
 ### ESTÁGIO 1 — CLASSIFICAR O MODO E MONTAR O PLANO
 
@@ -464,6 +478,12 @@ Nada fecha amarelo. O loop, com o gate de craft na frente:
    /tester roda TUDO: E2E + unitário + 4 dimensões + a11y → emite o canvas
                 │
                 ▼
+   PROVA DE CICLO (canvas verde) → commit + PR
+                │
+                ▼
+   QSP Gate (CI: ALWAYS + IMPACT + drift) ── vermelho ──► Dev corrige; QA NÃO começa
+                │ verde = READY FOR QA
+                ▼
    /qa-senior julga: APROVADA ou REPROVADA
                 │
     REPROVADA   │  APROVADA ──► ⚙️ /impeccable polish+harden ──► /engenheiro-devops (com autorização)
@@ -608,6 +628,39 @@ Quando um especialista é invocado **solto** (o usuário digitou `/dev-senior` s
 
 Se você retoma um projeto cujo canvas foi alimentado só por `/consolidar` (modo `solo`): leia o canvas + o repo, reconcilie delta (repo vence), e só então classifique o modo e avance.
 
+### 📘 PLAYBOOK 11 — QSP (governança depois do commit)
+
+Contrato curto: `skills/dev/qsp/ECOSSISTEMA.md` (repo agentes). **Num produto:** `C:\Users\DULINO\.cursor\skills\qsp\ECOSSISTEMA.md` (Cursor) ou `C:\Users\DULINO\.claude\skills\qsp\ECOSSISTEMA.md` (Claude). Pacote: pasta `pacote/` ao lado do contrato. Demo: `labs/qsp-ecossistema/` só no repo agentes (`node demo.mjs`).
+
+QSP **não segura bastão**. Não é o 13º especialista. É CI + mapa + Ficha.
+
+**Primeira vez (sem `docs/security/qsp-coverage-map.json`):**
+1. `/engenheiro-seguranca` (modo implantação) copia a Ficha e preenche o **técnico**: stack, o que existe (auth, banco, upload, pagamento, IA, jobs, CI), como o código faz login/sessão. Não deixa a matriz de permissão em branco “para o humano inventar”.
+2. `/product-manager` preenche o **negócio** a partir do projeto (PRD, EQUIPE.md, README, papéis na UI; código/RLS só como *inferência*). Cada resposta: `produto` | `código-inferida` | `suposição`. Seção 17 só o que o repo não responde.
+3. HARD STOP: humano **valida ou corrige** — não preenche formulário vazio. Status **VALIDADA** só o humano.
+4. Segurança gera o mapa **real**. Devops liga `PR QSP Gate` + periódico.
+5. Correção de regra de negócio **antes** da Ficha VALIDADA é proibida.
+
+**Toda PR depois:**
+```
+ALWAYS  → lint/test/build/secrets/authz unitário/perf crítica/drift   (toda PR)
+IMPACT  → RLS/storage/edge/perf DB só se o diff tocou a superfície
+PERIODIC → sweep do sistema (não é a PR)
+HUMAN   → branch protection, DPA, painéis
+```
+
+**Três campos no EQUIPE.md (seção 7) — não colapsar:**
+
+| Campo | Quem | Significa |
+|-------|------|-----------|
+| Prova de ciclo | `/tester` (+ segurança da sessão) | Pode abrir PR |
+| QSP Gate | CI | READY FOR QA |
+| Veredito `/qa-senior` | QA **depois** do Gate verde | APROVADA / REPROVADA de produto |
+
+`/qa-senior` **não inicia** QA de produto com Gate vermelho ou ausente (salvo ciclo de implantação, Ficha ainda não VALIDADA).
+
+**Você jamais:** despacha um agente para “ser o QSP”; pede a um LLM para julgar a PR; declara ciclo fechado só com APROVADA local; aceita dois CIs de qualidade em paralelo (o ALWAYS **é** o quality do devops).
+
 ---
 
 ## O WORKFLOW EXECUTÁVEL (delegar o núcleo paralelizável ao harness)
@@ -734,8 +787,10 @@ Trate isso como andaime: dimensione ao modo (bugfix não precisa de workflow; Sa
 - **Gate de craft (/impeccable):** [pendente | limpo | N achados P0/P1 → corrigidos]
 - **Auditoria de segurança:** [pendente | limpa | N achados → corrigidos]
 - **Gate de performance:** [pendente | limpo | baseline + delta em docs/perf/]
-- **Canvas do /tester:** [pendente | loop N: X/Y verdes por dimensão]
-- **Veredito /qa-senior:** [pendente | APROVADA YYYY-MM-DD | REPROVADA → loop N]
+- **Canvas do /tester (prova de ciclo):** [pendente | loop N: X/Y verdes — autoriza PR]
+- **QSP:** [ausente → implantar | Ficha EM VALIDAÇÃO | mapa em docs/security/qsp-coverage-map.json]
+- **QSP Gate (PR):** [pendente | PASS READY FOR QA | FAIL — volta ao Dev]
+- **Veredito /qa-senior:** [pendente até Gate verde | APROVADA YYYY-MM-DD | REPROVADA → loop N]
 
 ## 8. Histórico de handoffs (append-only)
 | Data | De → Para | Artefato | Gate |
@@ -851,7 +906,10 @@ para o escopo do PRD, seções 3-5."]
 - ❌ Copiar artefatos para dentro do EQUIPE.md — o canvas aponta, não duplica
 - ❌ Aceitar "aproveitei e fiz também X" fora do escopo — não passa no gate; vira pendência priorizada ou sai
 - ❌ Insistir num loop de qualidade que não converge em 3 voltas — o problema é estrutural; escale à fase de origem
-- ❌ Usar nomes de skills-membro que não existem — o roster de **bastão** é fechado: as **12 skills** + você. Secretário: `/consolidar` (não segura bastão de produto). Comandos da casa: `/impeccable`, `/ui-ux-pro-max`. Satélites só as listadas em `skills/dev/skills-satelites.md`, operadas pelo especialista dono, nunca como 13º membro
+- ❌ Usar nomes de skills-membro que não existem — o roster de **bastão** é fechado: as **12 skills** + você. Secretário: `/consolidar` (não segura bastão de produto). Comandos da casa: `/impeccable`, `/ui-ux-pro-max`. Satélites só as listadas em `skills/dev/skills-satelites.md`, operadas pelo especialista dono, nunca como 13º membro. **QSP não é membro.**
+- ❌ Despachar um “agente QSP” para julgar a PR, ou pedir a um LLM o veredito no lugar do CI — o Gate é máquina (Playbook 11)
+- ❌ Mandar `/qa-senior` começar QA de produto com QSP Gate vermelho ou ausente (exceto implantação: Ficha ainda não VALIDADA)
+- ❌ Declarar ciclo fechado só com APROVADA local — falta Gate verde + QA de produto + protection da `main` (ou 🔎 humana)
 - ❌ Despachar um comando de knowledge-work / stitch / copilot como se fosse um especialista — roteie pelo catálogo (Playbook 9) e o dono puxa a skill
 - ❌ Mandar `/tester` ou `/qa-senior` carregar um arquivo de checklist separado — o checklist mestre vive **dentro** da skill; designers é que usam `designer-checklist-mestre`
 - ❌ Deixar `/arquiteto-senior` ou `/dev-senior` escrever schema/migration/RLS sem carregar `supabase-postgres-best-practices` + `supabase`
@@ -877,8 +935,10 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 - [ ] Auditoria do `/engenheiro-seguranca` com críticos e altos zerados; médios/baixos com decisão registrada
 - [ ] Gate do `/engenheiro-performance`: baseline + p95/p99 no orçamento; causas sistêmicas na origem; ganho cego no CI
 - [ ] Canvas do `/tester` 100%: logs limpos, zero regressão visual, performance no orçamento, todas as jornadas críticas verdes — por role, viewport e tema
-- [ ] Veredito **APROVADA** do `/qa-senior`, por escrito, no EQUIPE.md
-- [ ] Todo bug do ciclo corrigido na causa-raiz, com teste de regressão permanente
+- [ ] QSP implantado: Ficha VALIDADA + mapa real + workflow `PR QSP Gate` (ou pendência 🔴 de implantação registrada)
+- [ ] QSP Gate **PASS** na PR (READY FOR QA) — ALWAYS + IMPACT exigidos + drift ok
+- [ ] Veredito **APROVADA** do `/qa-senior` **depois** do Gate, por escrito, no EQUIPE.md
+- [ ] Todo bug do ciclo corrigido na causa-raiz, com teste de regressão permanente **e** id no mapa QSP quando a regra for crítica
 
 **Operação**
 - [ ] Deploy executado pelo `/engenheiro-devops` com autorização explícita do usuário
@@ -941,7 +1001,9 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
 | UI passou no gate de craft | `/engenheiro-seguranca` (sempre no projeto-do-zero; na feature, se toca auth/dados/pagamento/upload/LLM) |
 | Auditoria de segurança limpa | `/engenheiro-performance` (projeto-do-zero e feature com UI/API/LLM; no bugfix só se o bug é de lentidão) |
 | Gate de performance limpo | `/tester` |
-| Canvas de testes emitido | `/qa-senior` |
+| Canvas de testes emitido (prova de ciclo) | commit + PR — **não** pule para `/qa-senior` de produto |
+| QSP Gate PASS (READY FOR QA) | `/qa-senior` |
+| QSP Gate FAIL / coverage gap | `/dev-senior` (mapa/teste) ou `/engenheiro-seguranca` se for controle de segurança |
 | Veredito REPROVADA — bug funcional/técnico | `/dev-senior` ou `/engenheiro-senior-produto` |
 | Veredito REPROVADA — performance (p95/INP/query/carga) | `/engenheiro-performance` |
 | Veredito REPROVADA — regressão visual/UX | `/designer-sites-senior` ou `/designer-saas-senior` (opera `/impeccable bolder/quieter/typeset/layout/animate/clarify`) + `/engenheiro-senior-produto` implementa |
@@ -961,9 +1023,10 @@ Um projeto (ou ciclo) só está PRONTO quando **tudo** abaixo é verdade:
   → implementação (/dev-senior + /engenheiro-senior-produto; + /engenheiro-ia quando há LLM)
        ⚙️ /impeccable craft/animate/clarify
   → GATE DE CRAFT: ⚙️ /impeccable audit+critique sobre a UI real
-  → /engenheiro-seguranca (auditoria)
+  → /engenheiro-seguranca (auditoria de ciclo; 1ª vez = implantação QSP, Playbook 11)
   → /engenheiro-performance (baseline + causa estrutural + gate CI)
-  → /tester (evidência automatizada nas 4 dimensões)
+  → /tester (evidência automatizada nas 4 dimensões) → prova de ciclo → PR
+  → QSP Gate (CI: ALWAYS + IMPACT + drift) → READY FOR QA
   → /qa-senior (veredito; REPROVADA = loop de volta a quem corrige)
   → ⚙️ /impeccable polish+harden → /engenheiro-devops (deploy + observabilidade)
   → /equipe (fecha o ciclo e reporta)

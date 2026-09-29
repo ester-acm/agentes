@@ -1,0 +1,12 @@
+{
+  "version": "1.1",
+  "applicable": true,
+  "enabled": true,
+  "environmentStrategy": "HUMAN_SETUP_REQUIRED",
+  "branching": { "available": false },
+  "existingNonProd": { "authorized": false },
+  "forbidProduction": true,
+  "target": { "label": "none", "projectRef": "", "isProduction": false },
+  "policy": { "failOnHigh": true },
+  "schedule": { "staleAfterDays": 22 }
+}

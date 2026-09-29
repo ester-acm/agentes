@@ -634,6 +634,7 @@ Uma feature só está pronta quando **tudo** abaixo estiver verificado:
 - [ ] Autorização em toda operação sensível (UI esconde E backend rejeita)
 - [ ] Tratamento de erro em toda operação assíncrona, com as 3 camadas (mensagem + ação + log)
 - [ ] Loading, erro, vazio (nos 3 tipos) e sucesso implementados
+- [ ] **QSP:** superfície nova (pagamento, upload, role, job) ⇒ entrada no `qsp-coverage-map.json` + teste; o Gate da PR é quem julga, não esta sessão
 
 **Polido (design e feel)**
 - [ ] Revisado LADO A LADO com o spec: tokens, espaçamento, tipografia, breakpoints

@@ -128,10 +128,19 @@ A regra: aplique o **princípio**, não o **aparato**. Um SLO num dashboard de S
 
 ### A esteira canônica
 
+O **required check** da `main` é o **QSP Gate** (agregador ALWAYS + IMPACT + coverage drift). Não mantenha um segundo workflow “lint-test-build” competindo com ele — isso **é** o ALWAYS.
+
+Contrato: `skills/dev/qsp/ECOSSISTEMA.md` (repo agentes) ou `C:\Users\DULINO\.cursor\skills\qsp\ECOSSISTEMA.md`. YAML de partida: `pacote/docs/security-template/workflows/pr-qsp-gate.example.yml` ao lado do contrato (adaptar; placeholders = fail-closed). Periódico: `periodic-qsp.example.yml`. Protection: `branch-protection.md` (🔎 humana: exigir o check `QSP Gate`).
+
 ```
-PR aberto ──► lint ─► typecheck ─► unit tests ─► build ─► E2E (/tester) ─► preview deploy (Vercel + Supabase branch)
+PR aberto ──► QSP Gate
+                ALWAYS: lint · typecheck · testes · build · secrets · authz unitário · perf crítica · drift
+                IMPACT: RLS/storage/edge/perf DB só se o diff (ou globalImpactPaths) pediu
+                agregador "QSP Gate" = READY FOR QA ou volta ao Dev
+         ──► /qa-senior (só com Gate verde)
+         ──► preview (Vercel + Supabase branch) pode correr em paralelo; merge NÃO
                                                                                 │
-merge na main ─────────────────────────────────────────────────────────────────┤
+merge na main (protection exige QSP Gate) ─────────────────────────────────────┤
                                                                                 ▼
                                                           migrations (supabase db push)
                                                                                 ▼
@@ -140,8 +149,10 @@ merge na main ──────────────────────
                                                           smoke test + release no Sentry
 ```
 
+Na PR, comente a saída do `qsp-impact` (quais IMPACT vão rodar). Gate vermelho: comente o dono (`quality` → Dev, `s-rls-runtime` → segurança, `coverage_drift` → atualizar mapa). Periódico abre issue, não PDF morto.
+
 Regras estruturais:
-- **Gates bloqueiam:** proteja a `main` com branch protection + required status checks. Sem check verde, sem merge. Ponto.
+- **Gates bloqueiam:** proteja a `main` exigindo o check **`QSP Gate`** (job agregador). Sem esse check verde, sem merge. Ponto. Sem isso a implantação QSP permanece INCOMPLETA (🔎 🔴).
 - **Cache de dependências:** `actions/setup-node` com `cache: 'npm'` (ou `pnpm`/`yarn`). Pipeline acima de 10 minutos vira pipeline que todo mundo burla.
 - **Concurrency:** cancele runs obsoletos do mesmo PR (`cancel-in-progress: true`); **nunca** cancele deploy de produção em andamento (`cancel-in-progress: false`).
 - **Secrets por Environment do GitHub:** crie Environments `preview` e `production`; segredos de produção só existem no environment `production`, que só roda a partir da `main`. Um PR de fork jamais enxerga segredo de produção.

@@ -1,0 +1,30 @@
+{
+  "project_ref": "example-staging-ref",
+  "summary": {
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 0,
+    "info": 0
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "title": "Table 'profiles' accessible with anonymous key",
+      "description": "Simulated finding for template self-test.",
+      "affected_resource": "Table: profiles",
+      "recommendation": "Enable RLS and add ownership policies.",
+      "evidence": {
+        "table": "profiles",
+        "sample_data": [{ "id": "sim", "email": "redact-me@example.com" }]
+      }
+    },
+    {
+      "severity": "medium",
+      "title": "Anonymous signup is enabled",
+      "description": "Simulated medium finding.",
+      "affected_resource": "Auth API",
+      "recommendation": "Review signup policy."
+    }
+  ]
+}

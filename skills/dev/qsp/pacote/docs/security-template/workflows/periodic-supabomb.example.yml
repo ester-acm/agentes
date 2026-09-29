@@ -1,0 +1,331 @@
+# Supabomb Periodic Security (EXEMPLO — fail-closed)
+#
+# Copiar para .github/workflows/periodic-supabomb.yml e ADAPTAR.
+# PADRÃO CORPORATIVO: Preview Branch efêmera (não segundo projeto permanente).
+# Fallback: staging/security-preview autorizado via secrets.
+# Produção: NUNCA fallback automático.
+#
+# Pin: stack-examples/supabase/supabomb/SUPABOMB-PIN.json
+# CONFIGURADO ≠ VALIDADO
+# NÃO publicar .supabomb.json / state com project_ref / keys.
+
+name: Supabomb Periodic Security
+
+on:
+  schedule:
+    - cron: '0 12 1,15 * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo da execução extraordinária (auth/RLS/storage/edge/pré-release/outro)'
+        required: false
+        default: 'manual'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: periodic-supabomb-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  SUPABOMB_PIN: '3ccc6befa598ea015f48d3e3563d0f9ac417a4f6'
+  SUPABOMB_REPO: 'https://github.com/ModernPentest/supabomb'
+
+jobs:
+  supabomb:
+    name: Supabomb scan (preview / non-prod)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout projeto
+        uses: actions/checkout@v4
+
+      - name: Fail-closed se example não adaptado
+        run: |
+          set -euo pipefail
+          if [ ! -f docs/security/supabomb.config.json ]; then
+            echo "::error::INCOMPLETE: docs/security/supabomb.config.json ausente (HUMAN-SETUP-REQUIRED)"
+            exit 1
+          fi
+          if [ ! -f scripts/supabomb-run.mjs ]; then
+            echo "::error::INCOMPLETE: scripts/supabomb-run.mjs ausente — copiar do template e adaptar"
+            exit 1
+          fi
+          if [ ! -f scripts/supabomb-preview.mjs ]; then
+            echo "::error::INCOMPLETE: scripts/supabomb-preview.mjs ausente"
+            exit 1
+          fi
+          if [ ! -f scripts/supabomb-compose-status.mjs ]; then
+            echo "::error::INCOMPLETE: scripts/supabomb-compose-status.mjs ausente"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup uv (Python runner)
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Mask persistent secrets
+        run: |
+          set -euo pipefail
+          if [ -n "${{ secrets.SUPABASE_ACCESS_TOKEN }}" ]; then
+            echo "::add-mask::${{ secrets.SUPABASE_ACCESS_TOKEN }}"
+          fi
+          if [ -n "${{ secrets.SUPABASE_PARENT_PROJECT_REF }}" ]; then
+            echo "::add-mask::${{ secrets.SUPABASE_PARENT_PROJECT_REF }}"
+          fi
+          if [ -n "${{ secrets.SUPABOMB_ANON_KEY }}" ]; then
+            echo "::add-mask::${{ secrets.SUPABOMB_ANON_KEY }}"
+          fi
+          if [ -n "${{ secrets.SUPABOMB_PROJECT_REF }}" ]; then
+            echo "::add-mask::${{ secrets.SUPABOMB_PROJECT_REF }}"
+          fi
+
+      - name: Preflight — resolver estratégia
+        id: strategy
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PARENT_PROJECT_REF: ${{ secrets.SUPABASE_PARENT_PROJECT_REF }}
+          SUPABOMB_PROJECT_REF: ${{ secrets.SUPABOMB_PROJECT_REF }}
+          SUPABOMB_ANON_KEY: ${{ secrets.SUPABOMB_ANON_KEY }}
+          SUPABOMB_CONFIG: docs/security/supabomb.config.json
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          mkdir -p security-reports/supabomb .tmp-supabomb-preview
+          set +e
+          out=$(node scripts/supabomb-preview.mjs status 2>&1)
+          code=$?
+          set -e
+          echo "$out"
+          if [ "$code" -ne 0 ]; then
+            echo '{"status":"INCOMPLETE","scanStatus":"INCOMPLETE","reason":"strategy_preflight_failed","cleanupRequired":false,"cleanupStatus":"N/A","at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+              > security-reports/supabomb/supabomb-last-run.json
+            echo "strategy=HUMAN_SETUP_REQUIRED" >> "$GITHUB_OUTPUT"
+            echo "cleanup_required=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          strategy=$(node -e "const j=JSON.parse(process.argv[1]); const s=j.strategy; console.log((s&&s.strategy)||s||'')" "$out")
+          echo "strategy=$strategy" >> "$GITHUB_OUTPUT"
+          if [ "$strategy" = "HUMAN_SETUP_REQUIRED" ]; then
+            echo '{"status":"INCOMPLETE","scanStatus":"INCOMPLETE","reason":"HUMAN_SETUP_REQUIRED","cleanupRequired":false,"cleanupStatus":"N/A","at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+              > security-reports/supabomb/supabomb-last-run.json
+            echo "cleanup_required=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          if [ "$strategy" = "EPHEMERAL_PREVIEW" ]; then
+            echo "cleanup_required=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cleanup_required=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Inject staging secrets (fallback EXISTING_NON_PROD)
+        if: steps.strategy.outputs.strategy == 'EXISTING_NON_PROD'
+        env:
+          SUPABOMB_PROJECT_REF: ${{ secrets.SUPABOMB_PROJECT_REF }}
+          SUPABOMB_ANON_KEY: ${{ secrets.SUPABOMB_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABOMB_PROJECT_REF:-}" ] || [ -z "${SUPABOMB_ANON_KEY:-}" ]; then
+            echo "::error::EXISTING_NON_PROD sem SUPABOMB_PROJECT_REF/SUPABOMB_ANON_KEY"
+            exit 1
+          fi
+          echo "::add-mask::$SUPABOMB_PROJECT_REF"
+          echo "::add-mask::$SUPABOMB_ANON_KEY"
+          echo "SUPABOMB_PROJECT_REF=$SUPABOMB_PROJECT_REF" >> "$GITHUB_ENV"
+          echo "SUPABOMB_ANON_KEY=$SUPABOMB_ANON_KEY" >> "$GITHUB_ENV"
+      - name: Create Preview Branch (efêmera)
+        id: create
+        if: steps.strategy.outputs.strategy == 'EPHEMERAL_PREVIEW'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PARENT_PROJECT_REF: ${{ secrets.SUPABASE_PARENT_PROJECT_REF }}
+          SUPABOMB_CONFIG: docs/security/supabomb.config.json
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABOMB_RUN_ID: ${{ github.run_id }}
+          SUPABOMB_PREVIEW_STATE: ${{ github.workspace }}/.tmp-supabomb-preview/state.json
+        run: node scripts/supabomb-preview.mjs create
+
+      - name: Wait Preview healthy (polling)
+        id: wait
+        if: steps.strategy.outputs.strategy == 'EPHEMERAL_PREVIEW'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABOMB_PREVIEW_STATE: ${{ github.workspace }}/.tmp-supabomb-preview/state.json
+          SUPABOMB_BRANCH_TIMEOUT_MS: '900000'
+          SUPABOMB_BRANCH_POLL_MS: '10000'
+        run: node scripts/supabomb-preview.mjs wait
+
+      - name: Get Preview client key (anon legacy)
+        id: keys
+        if: steps.strategy.outputs.strategy == 'EPHEMERAL_PREVIEW'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PARENT_PROJECT_REF: ${{ secrets.SUPABASE_PARENT_PROJECT_REF }}
+          SUPABOMB_CONFIG: docs/security/supabomb.config.json
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABOMB_PREVIEW_STATE: ${{ github.workspace }}/.tmp-supabomb-preview/state.json
+        run: |
+          set -euo pipefail
+          node scripts/supabomb-preview.mjs keys
+          # Mascarar valores dinâmicos exportados para GITHUB_ENV
+          if [ -n "${SUPABOMB_ANON_KEY:-}" ]; then echo "::add-mask::$SUPABOMB_ANON_KEY"; fi
+          if [ -n "${SUPABOMB_PROJECT_REF:-}" ]; then echo "::add-mask::$SUPABOMB_PROJECT_REF"; fi
+
+      - name: Run Supabomb wrapper (pinned)
+        id: scan
+        env:
+          # Credenciais via GITHUB_ENV (preview keys OU inject staging) — nunca produção
+          SUPABOMB_CONFIG: docs/security/supabomb.config.json
+          SUPABOMB_OUT_DIR: security-reports/supabomb
+          SUPABOMB_MODE: full
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABASE_PARENT_PROJECT_REF: ${{ secrets.SUPABASE_PARENT_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          mkdir -p security-reports/supabomb
+          set +e
+          node scripts/supabomb-run.mjs
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ ! -f security-reports/supabomb/supabomb-last-run.json ]; then
+            echo '{"status":"INCOMPLETE","scanStatus":"INCOMPLETE","reason":"no_last_run","cleanupStatus":"PENDING","at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+              > security-reports/supabomb/supabomb-last-run.json
+          fi
+          scan=$(node -pe "JSON.parse(require('fs').readFileSync('security-reports/supabomb/supabomb-last-run.json','utf8')).scanStatus||JSON.parse(require('fs').readFileSync('security-reports/supabomb/supabomb-last-run.json','utf8')).status||'INCOMPLETE'")
+          echo "scan_status=$scan" >> "$GITHUB_OUTPUT"
+          # Não falhar o job aqui — cleanup + compose decidem o verde/vermelho
+          exit 0
+
+      - name: Ensure sanitized workspace (no raw secrets)
+        if: always()
+        run: |
+          set -euo pipefail
+          rm -f .supabomb.json || true
+          rm -rf .tmp-supabomb-tool || true
+          rm -f security-reports/supabomb/raw-report.json || true
+          # state local com project_ref — nunca artifact
+          # (cleanup step remove; aqui só garante se delete já rodou)
+
+      - name: Cleanup Preview Branch (ALWAYS)
+        id: cleanup
+        if: always()
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABOMB_PREVIEW_STATE: ${{ github.workspace }}/.tmp-supabomb-preview/state.json
+          SUPABOMB_OUT_DIR: security-reports/supabomb
+        run: |
+          set -euo pipefail
+          required="${{ steps.strategy.outputs.cleanup_required }}"
+          if [ "$required" != "true" ]; then
+            echo '{"cleanupStatus":"N/A","reason":"cleanup_not_required","durationMs":0}' \
+              > security-reports/supabomb/supabomb-cleanup.json
+            echo "cleanup_status=N/A" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          set +e
+          node scripts/supabomb-preview.mjs delete
+          code=$?
+          set -e
+          if [ -f security-reports/supabomb/supabomb-cleanup.json ]; then
+            st=$(node -pe "JSON.parse(require('fs').readFileSync('security-reports/supabomb/supabomb-cleanup.json','utf8')).cleanupStatus||'FAIL'")
+          else
+            st=FAIL
+            echo '{"cleanupStatus":"FAIL","reason":"cleanup_record_missing","orphanRisk":true,"at":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+              > security-reports/supabomb/supabomb-cleanup.json
+          fi
+          echo "cleanup_status=$st" >> "$GITHUB_OUTPUT"
+          rm -rf .tmp-supabomb-preview || true
+          exit 0
+
+      - name: Compose final status (scan ⊕ cleanup)
+        id: final
+        if: always()
+        env:
+          SUPABOMB_OUT_DIR: security-reports/supabomb
+          SUPABOMB_REPO_ROOT: ${{ github.workspace }}
+          SUPABOMB_SCAN_STATUS: ${{ steps.scan.outputs.scan_status }}
+          SUPABOMB_CLEANUP_STATUS: ${{ steps.cleanup.outputs.cleanup_status }}
+          SUPABOMB_CLEANUP_REQUIRED: ${{ steps.strategy.outputs.cleanup_required }}
+        run: |
+          set -euo pipefail
+          # Se preflight falhou antes do scan
+          if [ -z "${SUPABOMB_SCAN_STATUS:-}" ]; then
+            export SUPABOMB_SCAN_STATUS=INCOMPLETE
+          fi
+          if [ -z "${SUPABOMB_CLEANUP_STATUS:-}" ]; then
+            export SUPABOMB_CLEANUP_STATUS=N/A
+          fi
+          set +e
+          node scripts/supabomb-compose-status.mjs
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit $code
+
+      - name: Job summary
+        if: always()
+        env:
+          SUPABOMB_PIN: ${{ env.SUPABOMB_PIN }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const last = JSON.parse(fs.readFileSync('security-reports/supabomb/supabomb-last-run.json','utf8'));
+          let cleanup = {};
+          try { cleanup = JSON.parse(fs.readFileSync('security-reports/supabomb/supabomb-cleanup.json','utf8')); } catch {}
+          const pin = process.env.SUPABOMB_PIN;
+          const counts = last.counts || {};
+          const status = last.status || 'INCOMPLETE';
+          const lines = [
+            `# Supabomb Periodic Security`,
+            ``,
+            `| Campo | Valor |`,
+            `|---|---|`,
+            `| Data (UTC) | ${last.at || new Date().toISOString()} |`,
+            `| Estratégia | ${last.environmentStrategy || 'n/d'} |`,
+            `| Pin Supabomb | \`${pin}\` |`,
+            `| Resultado final | **${status}** |`,
+            `| Scan | ${last.scanStatus || 'n/d'} |`,
+            `| Cleanup | ${last.cleanupStatus || cleanup.cleanupStatus || 'n/d'} |`,
+            `| Cleanup duração (ms) | ${cleanup.durationMs ?? 'n/d'} |`,
+            `| Motivo | ${last.reason || ''} |`,
+            `| critical | ${counts.critical ?? 0} |`,
+            `| high | ${counts.high ?? 0} |`,
+            `| medium | ${counts.medium ?? 0} |`,
+            `| low | ${counts.low ?? 0} |`,
+            `| info | ${counts.info ?? 0} |`,
+            `| Artifact | \`supabomb-security-report\` |`,
+            `| PADRÃO | Preview Branch efêmera; staging = fallback; produção proibida |`,
+            `| Event | ${process.env.GITHUB_EVENT_NAME || ''} |`,
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          NODE
+
+      - name: Upload sanitized artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabomb-security-report
+          path: |
+            security-reports/supabomb/supabomb-sanitized.json
+            security-reports/supabomb/supabomb-summary.md
+            security-reports/supabomb/supabomb-last-run.json
+            security-reports/supabomb/supabomb-cleanup.json
+          retention-days: 30
+          if-no-files-found: warn

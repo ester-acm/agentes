@@ -1194,6 +1194,8 @@ Antes de encerrar qualquer entrega, confirme **tudo**:
 - [ ] Commits atômicos com mensagens que explicam o porquê; PR pequeno e descrito
 - [ ] Relatório de entrega (Template 3) preenchido para o handoff
 - [ ] Se tocou banco: `supabase-postgres-best-practices` + `supabase` carregadas; types regenerados
+- [ ] **QSP:** se criei/alterei tabela, RLS, RPC, Edge, storage, job, role, webhook ou pagamento — atualizei `docs/security/qsp-coverage-map.json` + teste que o Gate rode (ALWAYS ou IMPACT). Superfície nova sem mapa = drift vermelho na PR
+- [ ] Preflight local quando o mapa existir: `qsp-validate-map` / impacto do diff. “Pronto pra PR” sem isso é retrabalho no CI
 
 ---
 
